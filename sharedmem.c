@@ -20,20 +20,17 @@
 typedef struct {
      uint8_t data0;
      uint8_t data1;
+     char* firstname;
+     char* lastname;
 } number;
 
 
 int producer1() 
-{ 
-    /* strings written to shared memory */
-//    const char* message_0 = "Sarayu"; 
-//    const char* message_1 = "Managoli\n"; 
-  
-    number prod1 = {1,2};
+{   
+    number prod1 = {1,2,"Sarayu","Managoli"};
 
     number *prod1_ptr = &prod1;
 
-   // prod1_ptr->data0 = 0;
     /* shared memory file descriptor */
     int file_share; 
   
@@ -41,20 +38,10 @@ int producer1()
     number *ptr = NULL; 
   
     /* create the shared memory object */
-    file_share = shm_open("Trial_Share", O_RDWR, 0666); 
-  
-    /* configure the size of the shared memory object */
-    //ftruncate(file_share, 100); 
+    file_share = shm_open("Trial_Share", O_RDWR, 0666);
   
     /* memory map the shared memory object */
     ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0); 
-  
-    /* write to the shared memory object */
-    /*sprintf(ptr, "%s", message_0); 
-  
-    ptr += strlen(message_0); 
-    sprintf(ptr, "%s", message_1); 
-    ptr += strlen(message_1); */
 
     memcpy((void *)(&ptr[0]),(void*)prod1_ptr,100);
 
@@ -66,35 +53,22 @@ int producer1()
 int producer2()
 {
     /* strings written to shared memory */
-//    const char* message_0 = "Gitanjali";
-//    const char* message_1 = "Suresh\n";
+      
+    number prod2 = {3,4,"Gitanjali","Suresh"};
 
-     number prod2 = {3,4};
-
-     number *prod2_ptr = &prod2;
-     //prod2_ptr->data0 = 1;
+    number *prod2_ptr = &prod2;
+ 
     /* shared memory file descriptor */
     int file_share;
 
     /* pointer to shared memory obect */
     number *ptr = NULL;
 
-
     /* create the shared memory object */
     file_share = shm_open("Trial_Share", O_RDWR, 0666);
 
-    /* configure the size of the shared memory object */
-    //ftruncate(file_share, 100);
-
     /* memory map the shared memory object */
     ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0);
-
-    /* write to the shared memory object */
-    /*sprintf(ptr, "%s", message_0);
-
-    ptr += strlen(message_0);
-    sprintf(ptr, "%s", message_1);
-    ptr += strlen(message_1);*/
 
     memcpy((void *)(&ptr[1]),(void*)prod2_ptr,100);
 
@@ -128,6 +102,10 @@ int consumer()
     printf("%d\n", ptr[0].data1);
     printf("%d\n", ptr[1].data0);
     printf("%d\n", ptr[1].data1);
+    printf("%s\n", ptr[0].firstname);
+    printf("%s\n", ptr[0].lastname);
+    printf("%s\n", ptr[1].firstname);
+    printf("%s\n", ptr[1].lastname);
    /* remove the shared memory object */
     shm_unlink("Trial_Share");
     return 0;
