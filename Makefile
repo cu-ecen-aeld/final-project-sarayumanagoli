@@ -15,7 +15,7 @@ endif
 all: helloworld
 
 helloworld: HelloWorld/helloworld.c
-	$(CC) $(CFLAGS) HelloWorld/helloworld.c -o helloworld $(LDFLAGS)
+	$(CC) $(CFLAGS) $(INCLUDES) HelloWorld/helloworld.c -o helloworld
 
 #make clean
 clean:
