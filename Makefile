@@ -12,11 +12,14 @@ ifeq ($(LDFLAGS),)
 	LDFLAGS = -pthread -lrt
 endif
 
-all: helloworld
+all: helloworld sharedmem
 
 helloworld: HelloWorld/helloworld.c
 	$(CC) $(CFLAGS) $(INCLUDES) HelloWorld/helloworld.c -o helloworld
 
+sharedmem: SharedMemory/sharedmem.c
+	$(CC) $(CFLAGS) $(INCLUDES) SharedMemory/sharedmem.c -o sharedmem $(LDFLAGS)
+
 #make clean
 clean:
-	rm -rf helloworld
+	rm -rf helloworld sharedmem

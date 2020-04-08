@@ -50,7 +50,11 @@ int producer1()
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0); 
 
 	producer1_sem = sem_open(prod1_semaphore,0,0666,0);
+	printf("Before wait\n");
+	//sem_wait(producer1_sem);
+	printf("After wait\n");
 	memcpy((void *)(&ptr[0]),(void*)prod1_ptr,sizeof(number));
+	//sem_post(producer1_sem);
 	sem_close(producer1_sem);
 	close(file_share);
 
@@ -79,7 +83,11 @@ int producer2()
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0);
 
 	producer2_sem = sem_open(prod2_semaphore,0,0666,0);
+	printf("Before wait\n");
+	//sem_wait(producer2_sem);
+	printf("After wait\n");
 	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
+	//sem_post(producer2_sem);	
 	sem_close(producer2_sem);
 	close(file_share);
 
@@ -105,6 +113,11 @@ int consumer()
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
 	
 	consumer_sem = sem_open(cons_semaphore,0,0666,0);
+	sem_post(consumer_sem);
+	printf("Before wait consumer\n");
+	//sem_wait(consumer_sem);
+	printf("After wait\n");
+	sem_wait(consumer_sem);	
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	sem_post(consumer_sem);
@@ -117,7 +130,7 @@ int consumer()
 	printf("%s\n", ptr[0].lastname);
 	printf("%s\n", ptr[1].firstname);
 	printf("%s\n", ptr[1].lastname);
-
+	//sem_post(consumer_sem);
 	sem_close(consumer_sem);
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
