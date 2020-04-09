@@ -12,7 +12,7 @@ ifeq ($(LDFLAGS),)
 	LDFLAGS = -pthread -lrt
 endif
 
-all: helloworld sharedmem
+all: helloworld sharedmem server
 
 helloworld: HelloWorld/helloworld.c
 	$(CC) $(CFLAGS) $(INCLUDES) HelloWorld/helloworld.c -o helloworld
@@ -20,6 +20,9 @@ helloworld: HelloWorld/helloworld.c
 sharedmem: SharedMemory/sharedmem.c
 	$(CC) $(CFLAGS) $(INCLUDES) SharedMemory/sharedmem.c -o sharedmem $(LDFLAGS)
 
+server: SocketServer/server.c
+	$(CC) $(CFLAGS) SocketServer/server.c -o server $(LDFLAGS)
+
 #make clean
 clean:
-	rm -rf helloworld sharedmem
+	rm -rf helloworld sharedmem server
