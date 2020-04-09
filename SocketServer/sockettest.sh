@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tester script for sockets using Netcat
 
-target=localhost
+target=192.168.0.2
 port=9000
 function printusage
 {
@@ -72,7 +72,7 @@ test_send_socket_string "abcdefg" ${comparefile}
 test_send_socket_string "hijklmnop" ${comparefile}
 test_send_socket_string "1234567890" ${comparefile}
 test_send_socket_string "9876543210" ${comparefile}
-test_send_socket_string "Gitanjali Suresh" ${comparefile}
+test_send_socket_string "Hello World!" ${comparefile}
 echo "Tests complete with success, last response from server was"
 cat ${comparefile}
 rm ${comparefile}

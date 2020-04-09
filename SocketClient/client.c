@@ -28,8 +28,8 @@ void func(int sockfd)
         n = 0; 
         while ((buff[n++] = getchar()) != '\n') 
             ; 
-        write(sockfd, buff, sizeof(buff)); 
-        bzero(buff, sizeof(buff)); 
+        while(write(sockfd, buff, strlen(buff))!=0); 
+        bzero(buff, strlen(buff)); 
         read(sockfd, buff, sizeof(buff)); 
         printf("From Server : %s", buff); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
@@ -69,7 +69,7 @@ int main()
 
 	// function for chat 
 	func(sockfd); 
-
+	
 	// close the socket 
 	close(sockfd); 
 	return 0;

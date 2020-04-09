@@ -79,7 +79,7 @@ int main(int argc, char *argv[2])
 		daemon = argv[1];
 	}
 
-	openlog("--SOCKETS--",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs
+	openlog("--SOCKETS--",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs	
 	
 	// Creating socket file descriptor 
 	syslog(LOG_DEBUG, "Creating socket file descriptor...");
@@ -88,7 +88,7 @@ int main(int argc, char *argv[2])
 		perror("socket failed"); 
 		exit(EXIT_FAILURE); 
 	} 
-	syslog(LOG_DEBUG, "Socket file descriptor created successfully!");	
+	syslog(LOG_DEBUG, "Socket file descriptor created successfully!");
 	
 	// Forcefully attaching socket to the port 9000 
 	syslog(LOG_DEBUG, "Attaching socket to the port 9000...");
@@ -206,15 +206,15 @@ int main(int argc, char *argv[2])
 
 		client_ip = inet_ntoa(address.sin_addr);		// To print the IP address in a readable form
 		syslog(LOG_INFO, "Accepted connection from %s", client_ip);
-
+		printf("\nAccepted connection from %s", client_ip);
+		
 		valread = recv(new_socket, buffer, MAX_SIZE, 0);	// Receiving the socket stream from the client
-
 		if(valread < 0)
 		{
 			perror("Receive Failed!");
 			exit(EXIT_FAILURE);
 		}
-		//buffer[valread] = '\0';
+		printf("\nReceived packet: %s",buffer);
 
 		ret_val = write(file_fd, buffer, valread);		//Writing the received socket packet into a file
 		if(ret_val == -1)
