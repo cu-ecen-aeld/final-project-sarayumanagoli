@@ -19,6 +19,7 @@
 #include <sys/shm.h> 
 #include <sys/stat.h> 
 #include <sys/wait.h> 
+#include "syslog.h"
 
 typedef struct {
 	uint8_t data0;
@@ -33,6 +34,7 @@ char *cons_semaphore = "consumer_sem_main";
 
 int producer1() 
 {   
+	syslog(LOG_INFO,"Message from PRODUCER 1");
 	sem_t* producer1_sem;
 	number prod1 = {1,2,"Embedded","Systems"};
 
@@ -64,6 +66,7 @@ int producer1()
 
 int producer2()
 {
+	syslog(LOG_INFO,"Message from PRODUCER 2");
 	sem_t* producer2_sem;
 	/* strings written to shared memory */
 
@@ -97,6 +100,7 @@ int producer2()
 
 int consumer()
 {
+	syslog(LOG_INFO,"Message from CONSUMER");
 	sem_t* consumer_sem;
 	
 	number cons;
@@ -147,6 +151,10 @@ int main(void)
 	pid_t sid = 0;
 	pid_t cid = 0;
 	int status = 0;
+
+	openlog("SharedMemory",LOG_PID|LOG_CONS,LOG_USER);
+	syslog(LOG_INFO,"Message from MAIN");
+
 	//int ret;
 	main_sem = sem_open(prod1_semaphore, O_CREAT, 0600, 0);
 	sem_close(main_sem);	
