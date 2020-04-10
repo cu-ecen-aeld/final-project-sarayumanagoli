@@ -195,6 +195,7 @@ int main(int argc, char *argv[2])
 		exit(EXIT_FAILURE);
         }
 
+
 	while(1)
 	{	
 		// Accepting the socket connection
