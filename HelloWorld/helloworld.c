@@ -9,7 +9,7 @@
 
 int main(void)
 {
-	printf("\n\rHello World!");
+	printf("Hello World!\n");
 	//Open syslog
 	openlog("HELLOWORLD",LOG_PID|LOG_CONS,LOG_USER);
 	syslog(LOG_INFO,"Message from HelloWorld!");
