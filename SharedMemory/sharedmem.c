@@ -1,4 +1,9 @@
-//From https://www.geeksforgeeks.org/posix-shared-memory-api/
+// Course : Advanced Embedded Software Development
+// Final Project : SHARED MEMORY IMPLEMENTATION
+// Author : Sarayu Managoli (SAMA2321)
+// Code Reference : http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-producer-orig.c
+//    		    http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-consumer.c
+//		    https://www.geeksforgeeks.org/posix-shared-memory-api/
 
 #include <stdint.h>
 #include <stdio.h>
@@ -120,9 +125,8 @@ int consumer()
 	consumer_sem = sem_open(cons_semaphore,0,0666,0);
 	sem_post(consumer_sem);
 	printf("Before wait consumer\n");
-	//sem_wait(consumer_sem);
+	sem_wait(consumer_sem);
 	printf("After wait consumer\n");
-	sem_wait(consumer_sem);	
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	sem_post(consumer_sem);
@@ -135,7 +139,6 @@ int consumer()
 	printf("%s\n", ptr[0].lastname);
 	printf("%s\n", ptr[1].firstname);
 	printf("%s\n", ptr[1].lastname);
-	//sem_post(consumer_sem);
 	sem_close(consumer_sem);
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
@@ -175,60 +178,15 @@ int main(void)
 		printf("FILE CLOSE ERROR\n"); 
 	}
 
-	/*printf("Creating child process\n");
-	// Create child process
-	process_id = fork();
-	printf("Child process is  = %d\n",process_id);
-	
-	//cid = waitpid(process_id,&status,0);
-	cid = wait(&status);	
-	printf("After wait for PID %d\n",cid);
-
-	
-	ret = kill(process_id,0);
-	printf("Kill returned %d\n", ret);
-
-	// Indication of fork() failure
-	if (process_id < 0)
-	{
-		// Return failure in exit status
-		exit(1);
-	}
-	// PARENT PROCESS. Need to kill it.
-	if (process_id > 0)
-	{
-		exit(0);
-	}
-	//unmask the file mode
-	umask(0);
-	printf("IN CHILD\n");
-	
-
-	//set new session
-	sid = setsid();
-	if(sid < 0)
-	{
-		printf("SID is less than 0\n");
-		// Return failure
-		exit(1);
-	}
-	// Change the current working directory to root.
-	chdir("/");*/
-
+//Calling Producer 1
         producer1();
 
 printf("Creating child process\n");
 	// Create child process
 	process_id = fork();
 	printf("Child process is  = %d\n",process_id);
-	
-	//cid = waitpid(process_id,&status,0);
 	cid = wait(&status);	
 	printf("After wait for PID %d\n",cid);
-
-	
-	//ret = kill(process_id,0);
-	//printf("Kill returned %d\n", ret);
 
 	// Indication of fork() failure
 	if (process_id < 0)
@@ -257,7 +215,9 @@ printf("Creating child process\n");
 	// Change the current working directory to root.
 	chdir("/");
 
+//Calling Producer 2 after child process is forked
     	producer2();
+//Calling Consumer
 	consumer();
 	
 	sem_unlink(prod1_semaphore);
