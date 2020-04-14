@@ -13,7 +13,7 @@
 
 int main()
 {
-	//char check_val[1] = {0x35};
+	char check_val[1] = {0x00};
 	char read_val[2] = {0};
 	int temp_file;
 	printf("\nThis is a test for the TMP102 sensor");
@@ -30,13 +30,13 @@ int main()
 	}
 	printf("\nSuccessfully connected to the sensor!");
 /*	printf("\nAttempting to write %x for POST",check_val[0]);
-	lseek(temp_file, 1, SEEK_SET);
+	lseek(temp_file, 1, SEEK_SET); */
 	if((write(temp_file, check_val, 1)) != 1)
 	{
 		perror("\nFailed to write to the check value to the configuration register");
 		exit(EXIT_FAILURE);
 	} 
-	printf("\nWrite successful!"); */
+	printf("\nWrite successful!");
 	lseek(temp_file, 0, SEEK_SET);
 	if((read(temp_file, read_val, 2)) != 2)
 	{
