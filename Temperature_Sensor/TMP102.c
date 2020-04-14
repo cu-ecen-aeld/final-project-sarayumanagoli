@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/i2c.h>
@@ -13,9 +14,11 @@
 
 int main()
 {
-	char check_val[1] = {0x00};
+	char check_val[1] = {TEMP_REGISTER};
 	char read_val[2] = {0};
 	int temp_file;
+	int16_t digitalTemp;
+	float tempC, tempF;
 	printf("\nThis is a test for the TMP102 sensor");
 	if((temp_file = open("/dev/i2c-2",O_RDWR)) < 0)
 	{
@@ -29,15 +32,14 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	printf("\nSuccessfully connected to the sensor!");
-/*	printf("\nAttempting to write %x for POST",check_val[0]);
-	lseek(temp_file, 1, SEEK_SET); */
+	printf("\nAttempting to reset the read address...");
 	if((write(temp_file, check_val, 1)) != 1)
 	{
-		perror("\nFailed to write to the check value to the configuration register");
+		perror("\nFailed to reset the read address");
 		exit(EXIT_FAILURE);
 	} 
-	printf("\nWrite successful!");
-	lseek(temp_file, 0, SEEK_SET);
+	printf("\nReset successful!");
+//	lseek(temp_file, 0, SEEK_SET);
 	if((read(temp_file, read_val, 2)) != 2)
 	{
 		perror("\nFailed to read the check value from the configuration register");
@@ -45,22 +47,14 @@ int main()
 	}	
 	printf("\nThe read value at 0 is 0x%02x",read_val[0]);
 	printf("\nThe read value at 1 is 0x%02x",read_val[1]);
-	printf("\nThe read value at 2 is 0x%02x",read_val[2]);
-	read_val[0] = 0;
-	read_val[1] = 0;
-	read_val[2] = 0;
-	printf("\nRead val before read [0] = 0x%x, [1] = 0x%x, [2] = 0x%x",read_val[0], read_val[1], read_val[2]);
-	lseek(temp_file, 1, SEEK_SET);
-	printf("\nChecking 2nd read");
-	printf("\nReading temperature...");
-	if((read(temp_file, read_val, 2)) != 2)
+	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
+	if(digitalTemp > 0x7FF)
 	{
-		perror("\nFailed to read the check value from the configuration register");
-		exit(EXIT_FAILURE);
-	}	
-	printf("\nThe read value at 0 is 0x%02x",read_val[0]);
-	printf("\nThe read value at 1 is 0x%02x",read_val[1]);
-	printf("\nThe read value at 2 is 0x%02x",read_val[2]);
+		digitalTemp |= 0xF000;
+	}
+	tempC = digitalTemp * 0.0625;
+	tempF = (tempC * (9/5)) + 32;
+	printf("\nThe temperature in C is %fC and in F is %fF", tempC, tempF);
 	close(temp_file);
 	printf("\nFile closed!\n");
 	return 0;
