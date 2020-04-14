@@ -25,7 +25,7 @@ int main()
 		perror("\nFailed to open the I2C-2 bus!");
 		exit(EXIT_FAILURE);
 	}
-	printf("\nSuccessfully opened the I2C-2 bus");
+	printf("\nSuccessfully opened the I2C-2 bus!");
 	if((ioctl(temp_file, I2C_SLAVE, DEV_ADDRESS)) < 0)
 	{
 		perror("\nFailed to connect to the sensor!");
@@ -40,21 +40,24 @@ int main()
 	} 
 	printf("\nReset successful!");
 //	lseek(temp_file, 0, SEEK_SET);
-	if((read(temp_file, read_val, 2)) != 2)
+	while(1)
 	{
-		perror("\nFailed to read the check value from the configuration register");
-		exit(EXIT_FAILURE);
-	}	
-	printf("\nThe read value at 0 is 0x%02x",read_val[0]);
-	printf("\nThe read value at 1 is 0x%02x",read_val[1]);
-	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
-	if(digitalTemp > 0x7FF)
-	{
-		digitalTemp |= 0xF000;
+		if((read(temp_file, read_val, 2)) != 2)
+		{
+			perror("\nFailed to read the check value from the configuration register");
+			exit(EXIT_FAILURE);
+		}	
+		//printf("\nThe read value at 0 is 0x%02x",read_val[0]);
+		//printf("\nThe read value at 1 is 0x%02x",read_val[1]);
+		digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
+		if(digitalTemp > 0x7FF)
+		{
+			digitalTemp |= 0xF000;
+		}
+		tempC = digitalTemp * 0.0625;
+		tempF = (tempC * (9/5)) + 32;
+		printf("\nThe temperature in C is %fC and in F is %fF", tempC, tempF);
 	}
-	tempC = digitalTemp * 0.0625;
-	tempF = (tempC * (9/5)) + 32;
-	printf("\nThe temperature in C is %fC and in F is %fF", tempC, tempF);
 	close(temp_file);
 	printf("\nFile closed!\n");
 	return 0;
