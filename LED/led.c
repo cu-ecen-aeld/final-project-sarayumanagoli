@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#define LED   (69)
+#define LED   (53)
 
 //#include "../inc/gpio.h"
 
