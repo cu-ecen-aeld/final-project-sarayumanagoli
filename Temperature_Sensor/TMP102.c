@@ -57,6 +57,7 @@ int main()
 		tempC = digitalTemp * 0.0625;
 		tempF = (tempC * (9/5)) + 32;
 		printf("\nThe temperature in C is %fC and in F is %fF", tempC, tempF);
+		sleep(1);
 	}
 	close(temp_file);
 	printf("\nFile closed!\n");
