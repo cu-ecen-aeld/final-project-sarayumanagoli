@@ -37,7 +37,7 @@ int main()
 		exit(EXIT_FAILURE);
 	} 
 	printf("\nWrite successful!"); */
-//	lseek(temp_file, 1, SEEK_SET);
+	lseek(temp_file, 0, SEEK_SET);
 	if((read(temp_file, read_val, 2)) != 2)
 	{
 		perror("\nFailed to read the check value from the configuration register");
@@ -50,6 +50,7 @@ int main()
 	read_val[1] = 0;
 	read_val[2] = 0;
 	printf("\nRead val before read [0] = 0x%x, [1] = 0x%x, [2] = 0x%x",read_val[0], read_val[1], read_val[2]);
+	lseek(temp_file, 1, SEEK_SET);
 	printf("\nChecking 2nd read");
 	printf("\nReading temperature...");
 	if((read(temp_file, read_val, 2)) != 2)
