@@ -13,7 +13,7 @@
 
 int main()
 {
-	char check_val[1] = {0x35};
+	//char check_val[1] = {0x35};
 	char read_val[2] = {0};
 	int temp_file;
 	printf("\nThis is a test for the TMP102 sensor");
@@ -29,8 +29,8 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	printf("\nSuccessfully connected to the sensor!");
-	printf("\nAttempting to write %x for POST",check_val[0]);
-/*	lseek(temp_file, 1, SEEK_SET);
+/*	printf("\nAttempting to write %x for POST",check_val[0]);
+	lseek(temp_file, 1, SEEK_SET);
 	if((write(temp_file, check_val, 1)) != 1)
 	{
 		perror("\nFailed to write to the check value to the configuration register");
@@ -43,23 +43,23 @@ int main()
 		perror("\nFailed to read the check value from the configuration register");
 		exit(EXIT_FAILURE);
 	}	
-	printf("\nThe read value at 0 is 0x%x",read_val[0]);
-	printf("\nThe read value at 1 is 0x%x",read_val[1]);
-	printf("\nThe read value at 2 is 0x%x",read_val[2]);
+	printf("\nThe read value at 0 is 0x%02x",read_val[0]);
+	printf("\nThe read value at 1 is 0x%02x",read_val[1]);
+	printf("\nThe read value at 2 is 0x%02x",read_val[2]);
 	read_val[0] = 0;
 	read_val[1] = 0;
 	read_val[2] = 0;
 	printf("\nRead val before read [0] = 0x%x, [1] = 0x%x, [2] = 0x%x",read_val[0], read_val[1], read_val[2]);
-	printf("\nChecking positional read");
+	printf("\nChecking 2nd read");
 	printf("\nReading temperature...");
-	if((pread(temp_file, read_val, 2, 0)) != 2)
+	if((read(temp_file, read_val, 2)) != 2)
 	{
 		perror("\nFailed to read the check value from the configuration register");
 		exit(EXIT_FAILURE);
-	}
-	printf("\nThe read value at 0 is 0x%x",read_val[0]);
-	printf("\nThe read value at 1 is 0x%x",read_val[1]);
-	printf("\nThe read value at 2 is 0x%x",read_val[2]);
+	}	
+	printf("\nThe read value at 0 is 0x%02x",read_val[0]);
+	printf("\nThe read value at 1 is 0x%02x",read_val[1]);
+	printf("\nThe read value at 2 is 0x%02x",read_val[2]);
 	close(temp_file);
 	printf("\nFile closed!\n");
 	return 0;
