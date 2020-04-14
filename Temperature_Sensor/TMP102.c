@@ -14,7 +14,7 @@
 int main()
 {
 	char check_val[1] = {0x35};
-	char read_val[1];
+	char read_val[2];
 	int temp_file;
 	printf("\nThis is a test for the TMP102 sensor");
 	if((temp_file = open("/dev/i2c-2",O_RDWR)) < 0)
@@ -37,13 +37,24 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	printf("\nWrite successful!");
+	lseek(temp_file, 1, SEEK_SET);
 	if((read(temp_file, read_val, 1)) != 1)
 	{
 		perror("\nFailed to read the check value from the configuration register");
 		exit(EXIT_FAILURE);
 	}	
-	printf("\nThe read value is 0x%02x",read_val[0]);
+	printf("\nThe read value at 0 is 0x%x",read_val[0]);
+	printf("\nThe read value at 1 is 0x%x",read_val[1]);
+	printf("\nChecking positional read");
+	printf("\nReading temperature...");
+	if((pread(temp_file, read_val, 2, 0)) != 2)
+	{
+		perror("\nFailed to read the check value from the configuration register");
+		exit(EXIT_FAILURE);
+	}
+	printf("\nThe read value at 0 is 0x%x",read_val[0]);
+	printf("\nThe read value at 1 is 0x%x",read_val[1]);
 	close(temp_file);
-	printf("\nFile closed!");
+	printf("\nFile closed!\n");
 	return 0;
 }
