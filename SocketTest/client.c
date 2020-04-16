@@ -75,7 +75,8 @@ void read_from_file(int sockfd)
 		{
 			read_data[fileread] = '\0';
 			printf("\nFILE -- %s",read_data);
-			ret_val = send(sockfd, read_data, (strlen(read_data)), 0); 	// Sending the read packets to the client socket
+			ret_val = write(sockfd, read_data, (strlen(read_data))); 	// Sending the read packets to the client socket
+			printf("\nRet_val = %d",ret_val);
 			if(ret_val < 0)
 			{
 				perror("Send failed!");
