@@ -124,5 +124,6 @@ int main()
 
 	// close the socket 
 	close(sockfd); 
+	printf("\nClosed the socket!");
 } 
 

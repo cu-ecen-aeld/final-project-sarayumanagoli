@@ -28,6 +28,11 @@ void func(int sockfd)
 
 		// read the message from client and copy it in buffer 
 		read(sockfd, buff, sizeof(buff)); 
+		if(buff[0] == 0)
+		{
+			printf("\nNo data!");
+			break;
+		}
 		// print buffer which contains the client contents 
 		printf("From client: %s\n ", buff); 
 		bzero(buff, MAX); 
