@@ -24,7 +24,7 @@ bool file_exists(char *filename)
 int main()
 {
 	char *file_location = "/var/tmp/temperature";
-	int fileread;	
+	int fileread, len = 0;	
 	char *data = malloc(30 * sizeof(char));
 	char check_val[1] = {TEMP_REGISTER};
 	char read_val[2] = {0};
@@ -81,9 +81,7 @@ int main()
 		{
 			perror("\nFailed to read the check value from the configuration register");
 			exit(EXIT_FAILURE);
-		}	
-		//printf("\nThe read value at 0 is 0x%02x",read_val[0]);
-		//printf("\nThe read value at 1 is 0x%02x",read_val[1]);
+		}
 		digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
 		if(digitalTemp > 0x7FF)
 		{
@@ -98,9 +96,12 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 		char *read_buffer = malloc(strlen(data) * sizeof(char));
-		fileread = read(data_file, read_buffer, strlen(data));
+//		lseek(data_file,0,SEEK_SET);
+		fileread = pread(data_file, read_buffer, strlen(data), len);
+		len += fileread;
 		read_buffer[fileread] = '\0';
 		printf("\nData read from file is %s",read_buffer);
+		free(read_buffer);
 		sleep(1);
 	}
 	close(temp_file);
