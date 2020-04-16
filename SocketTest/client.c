@@ -68,12 +68,13 @@ void read_from_file(int sockfd)
 			exit(EXIT_FAILURE);
 		}
 		printf("\nFile opened successfully!");
-		read_data = (char *)malloc(100 *sizeof(char));
+		read_data = (char *)malloc(500 *sizeof(char));
 		lseek(data_file,0,SEEK_SET);
 		//len = 0;
-		while((fileread = read(data_file, read_data, 100)) != 0)	// Reading the contents of the file until new line is reached
+		while((fileread = read(data_file, read_data, 500)) != 0)	// Reading the contents of the file until new line is reached
 		{
 			read_data[fileread] = '\0';
+			printf("\nFILE -- %s",read_data);
 			ret_val = send(sockfd, read_data, (strlen(read_data)), 0); 	// Sending the read packets to the client socket
 			if(ret_val < 0)
 			{

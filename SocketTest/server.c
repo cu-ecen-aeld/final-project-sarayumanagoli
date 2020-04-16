@@ -13,7 +13,7 @@
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <unistd.h>
-#define MAX 100
+#define MAX 500
 #define PORT 8080 
 #define SA struct sockaddr 
 
@@ -29,7 +29,7 @@ void func(int sockfd)
 		// read the message from client and copy it in buffer 
 		read(sockfd, buff, sizeof(buff)); 
 		// print buffer which contains the client contents 
-		printf("From client: %s\t To client : ", buff); 
+		printf("From client: %s\n ", buff); 
 		bzero(buff, MAX); 
 /*		n = 0; 
 		// copy server message in the buffer 
