@@ -68,34 +68,19 @@ void read_from_file(int sockfd)
 			exit(EXIT_FAILURE);
 		}
 		printf("\nFile opened successfully!");
-/*		read_data = (char *)malloc(500 *sizeof(char));
-		lseek(data_file,0,SEEK_SET);
-		//len = 0;
-		while((fileread = read(data_file, read_data, 500)) != 0)	// Reading the contents of the file until new line is reached
-		{
-			read_data[fileread] = '\0';
-			printf("\nFILE -- %s",read_data);
-			ret_val = write(sockfd, read_data, (strlen(read_data))); 	// Sending the read packets to the client socket
-			printf("\nRet_val = %d",ret_val);
-			if(ret_val < 0)
-			{
-				perror("Send failed!");
-				exit(EXIT_FAILURE);
-			}
-			//len += fileread;
-		}	*/
 		read_data = (char *)malloc(100 *sizeof(char));
 		while((fgets(read_data, 100, data_file)) != NULL)
 		{
-			printf("\nFILE -- %s",read_data);
+			printf("\n To Server: %s",read_data);
 			ret_val = write(sockfd, read_data, (strlen(read_data))); 	// Sending the read packets to the client socket
-			printf("\nRet_val = %d",ret_val);
+			//printf("\nRet_val = %d",ret_val);
 			if(ret_val < 0)
 			{
 				perror("Send failed!");
 				exit(EXIT_FAILURE);
 			}	
 		}
+		printf("\nNo more data to send!\n");
 		free(read_data);				
 	}
 }	
