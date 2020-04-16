@@ -23,7 +23,8 @@ bool file_exists(char *filename)
 
 int main()
 {
-	char *file_location = "\var\tmp\temperature";
+	char *file_location = "/var/tmp/temperature";
+	int fileread;	
 	char *data = malloc(30 * sizeof(char));
 	char check_val[1] = {TEMP_REGISTER};
 	char read_val[2] = {0};
@@ -96,6 +97,10 @@ int main()
 			perror("Write to data file failed!");
 			exit(EXIT_FAILURE);
 		}
+		char *read_buffer = malloc(strlen(data) * sizeof(char));
+		fileread = read(data_file, read_buffer, strlen(data));
+		read_buffer[fileread] = '\0';
+		printf("\nData read from file is %s",read_buffer);
 		sleep(1);
 	}
 	close(temp_file);
