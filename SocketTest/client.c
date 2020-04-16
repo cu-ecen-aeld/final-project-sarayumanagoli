@@ -50,9 +50,9 @@ bool file_exists(char *filename)
 void read_from_file(int sockfd)
 {
 	char *file_location = "/var/tmp/temperature";
-	int data_file;
+	FILE *data_file;
 	char *read_data = NULL;
-	int fileread, ret_val;
+	int ret_val;
 	
 	// Check if the file exists
 	if(file_exists(file_location) == false)
@@ -62,13 +62,13 @@ void read_from_file(int sockfd)
 	}	
 	else
 	{
-		if((data_file = open(file_location, O_RDWR|O_APPEND)) < 0)
+		if((data_file = fopen(file_location, "r")) < 0)
 		{
 			perror("File couldn't be opened");
 			exit(EXIT_FAILURE);
 		}
 		printf("\nFile opened successfully!");
-		read_data = (char *)malloc(500 *sizeof(char));
+/*		read_data = (char *)malloc(500 *sizeof(char));
 		lseek(data_file,0,SEEK_SET);
 		//len = 0;
 		while((fileread = read(data_file, read_data, 500)) != 0)	// Reading the contents of the file until new line is reached
@@ -83,7 +83,20 @@ void read_from_file(int sockfd)
 				exit(EXIT_FAILURE);
 			}
 			//len += fileread;
-		}	
+		}	*/
+		read_data = (char *)malloc(100 *sizeof(char));
+		while((fgets(read_data, 100, data_file)) != NULL)
+		{
+			printf("\nFILE -- %s",read_data);
+			ret_val = write(sockfd, read_data, (strlen(read_data))); 	// Sending the read packets to the client socket
+			printf("\nRet_val = %d",ret_val);
+			if(ret_val < 0)
+			{
+				perror("Send failed!");
+				exit(EXIT_FAILURE);
+			}	
+		}
+		free(read_data);				
 	}
 }	
 

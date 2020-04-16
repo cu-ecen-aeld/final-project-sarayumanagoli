@@ -13,7 +13,7 @@
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <unistd.h>
-#define MAX 500
+#define MAX 100
 #define PORT 8080 
 #define SA struct sockaddr 
 
@@ -30,7 +30,7 @@ void func(int sockfd)
 		read(sockfd, buff, sizeof(buff)); 
 		if(buff[0] == 0)
 		{
-			printf("\nNo data!");
+			printf("\nNo more data!");
 			break;
 		}
 		// print buffer which contains the client contents 
