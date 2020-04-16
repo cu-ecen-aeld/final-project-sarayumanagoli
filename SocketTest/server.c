@@ -13,7 +13,7 @@
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <unistd.h>
-#define MAX 80 
+#define MAX 100
 #define PORT 8080 
 #define SA struct sockaddr 
 
@@ -21,7 +21,7 @@
 void func(int sockfd) 
 { 
 	char buff[MAX]; 
-	int n; 
+	//int n; 
 	// infinite loop for chat 
 	for (;;) { 
 		bzero(buff, MAX); 
@@ -31,7 +31,7 @@ void func(int sockfd)
 		// print buffer which contains the client contents 
 		printf("From client: %s\t To client : ", buff); 
 		bzero(buff, MAX); 
-		n = 0; 
+/*		n = 0; 
 		// copy server message in the buffer 
 		while ((buff[n++] = getchar()) != '\n') 
 			; 
@@ -43,7 +43,7 @@ void func(int sockfd)
 		if (strncmp("exit", buff, 4) == 0) { 
 			printf("Server Exit...\n"); 
 			break; 
-		} 
+		} */
 	} 
 } 
 

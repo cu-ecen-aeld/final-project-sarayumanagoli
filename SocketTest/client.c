@@ -12,10 +12,14 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/stat.h> 	//for stat 
+#include <stdbool.h>
+#include <fcntl.h>
+
 #define MAX 80 
 #define PORT 8080 
 #define SA struct sockaddr 
-void func(int sockfd) 
+/*void func(int sockfd) 
 { 
 	char buff[MAX]; 
 	int n; 
@@ -34,7 +38,54 @@ void func(int sockfd)
 			break; 
 		} 
 	} 
-} 
+} */
+
+/* Function to check if a given file exists */
+bool file_exists(char *filename)
+{
+	struct stat buffer;
+	return (stat(filename,&buffer) == 0);
+}
+
+void read_from_file(int sockfd)
+{
+	char *file_location = "/var/tmp/temperature";
+	int data_file;
+	char *read_data = NULL;
+	int fileread, ret_val;
+	
+	// Check if the file exists
+	if(file_exists(file_location) == false)
+	{
+		perror("File doesn't exist!");
+		exit(EXIT_FAILURE);
+	}	
+	else
+	{
+		if((data_file = open(file_location, O_RDWR|O_APPEND)) < 0)
+		{
+			perror("File couldn't be opened");
+			exit(EXIT_FAILURE);
+		}
+		printf("\nFile opened successfully!");
+		read_data = (char *)malloc(100 *sizeof(char));
+		lseek(data_file,0,SEEK_SET);
+		//len = 0;
+		while((fileread = read(data_file, read_data, 100)) != 0)	// Reading the contents of the file until new line is reached
+		{
+			read_data[fileread] = '\0';
+			ret_val = send(sockfd, read_data, (strlen(read_data)), 0); 	// Sending the read packets to the client socket
+			if(ret_val < 0)
+			{
+				perror("Send failed!");
+				exit(EXIT_FAILURE);
+			}
+			//len += fileread;
+		}	
+	}
+}	
+
+
 
 int main() 
 { 
@@ -53,7 +104,7 @@ int main()
 
 	// assign IP, PORT 
 	servaddr.sin_family = AF_INET; 
-	servaddr.sin_addr.s_addr = inet_addr("10.0.0.70"); 
+	servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
 	servaddr.sin_port = htons(PORT); 
 
 	// connect the client socket to server socket 
@@ -65,7 +116,9 @@ int main()
 		printf("connected to the server..\n"); 
 
 	// function for chat 
-	func(sockfd); 
+	//func(sockfd); 
+
+	read_from_file(sockfd);
 
 	// close the socket 
 	close(sockfd); 

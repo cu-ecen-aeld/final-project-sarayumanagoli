@@ -23,8 +23,7 @@ bool file_exists(char *filename)
 
 int main()
 {
-	char *file_location = "/var/tmp/temperature";
-	int fileread, len = 0;	
+	char *file_location = "/var/tmp/temperature";	
 	char *data = malloc(30 * sizeof(char));
 	char check_val[1] = {TEMP_REGISTER};
 	char read_val[2] = {0};
@@ -95,13 +94,14 @@ int main()
 			perror("Write to data file failed!");
 			exit(EXIT_FAILURE);
 		}
-		char *read_buffer = malloc(strlen(data) * sizeof(char));
+		printf("\nData written to file!");
+/*		char *read_buffer = malloc(strlen(data) * sizeof(char));
 //		lseek(data_file,0,SEEK_SET);
 		fileread = pread(data_file, read_buffer, strlen(data), len);
 		len += fileread;
 		read_buffer[fileread] = '\0';
 		printf("\nData read from file is %s",read_buffer);
-		free(read_buffer);
+		free(read_buffer); */
 		sleep(1);
 	}
 	close(temp_file);
