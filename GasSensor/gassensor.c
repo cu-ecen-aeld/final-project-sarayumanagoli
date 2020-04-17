@@ -51,6 +51,7 @@ int main()
 	while(1)
 	{
 		read_value(4);
+		usleep(500000);
 	}
 	return 0;
 } 
