@@ -34,7 +34,7 @@ char *cons_semaphore = "consumer_sem_main";
 
 int producer1() 
 {   
-	syslog(LOG_INFO,"Message from PRODUCER 1");
+	printf("Message from PRODUCER 1\n");
 	sem_t* producer1_sem;
 	number prod1 = {1,2,"Embedded","Systems"};
 
@@ -66,7 +66,7 @@ int producer1()
 
 int producer2()
 {
-	syslog(LOG_INFO,"Message from PRODUCER 2");
+	printf("Message from PRODUCER 2\n");
 	sem_t* producer2_sem;
 	/* strings written to shared memory */
 
@@ -100,7 +100,7 @@ int producer2()
 
 int consumer()
 {
-	syslog(LOG_INFO,"Message from CONSUMER");
+	printf("Message from CONSUMER\n");
 	sem_t* consumer_sem;
 	
 	number cons;
@@ -141,6 +141,7 @@ int consumer()
 	shm_unlink("Trial_Share");
 	munmap(ptr,sizeof(number));
 	printf("Exiting consumer\n");
+	close(file_share);
 	return 0;
 }
 

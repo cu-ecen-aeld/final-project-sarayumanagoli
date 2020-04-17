@@ -12,13 +12,16 @@ ifeq ($(LDFLAGS),)
 	LDFLAGS = -pthread -lrt
 endif
 
-all: helloworld sharedmem server client servertest clienttest TMP102 gassensor led
+all: helloworld sharedmem sharedmem_integrated server client servertest clienttest TMP102 gassensor led
 
 helloworld: HelloWorld/helloworld.c
 	$(CC) $(CFLAGS) $(INCLUDES) HelloWorld/helloworld.c -o helloworld
 
 sharedmem: SharedMemory/sharedmem.c
 	$(CC) $(CFLAGS) $(INCLUDES) SharedMemory/sharedmem.c -o sharedmem $(LDFLAGS)
+
+sharedmem_integrated: SharedMemory_Integrated/sharedmem_integrated.c
+	$(CC) $(CFLAGS) $(INCLUDES) SharedMemory_Integrated/sharedmem_integrated.c -o sharedmem_integrated $(LDFLAGS)
 
 server: SocketServer/server.c
 	$(CC) $(CFLAGS) SocketServer/server.c -o server $(LDFLAGS)
@@ -43,4 +46,4 @@ led: LED/led.c
 
 #make clean
 clean:
-	rm -rf helloworld sharedmem server client servertest clienttest TMP102 gassensor led
+	rm -rf helloworld sharedmem sharedmem_integrated server client servertest clienttest TMP102 gassensor led
