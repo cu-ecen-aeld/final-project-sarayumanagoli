@@ -122,8 +122,8 @@ int producer2()
 	uint8_t fd; 
 	char buffer[MAX_BUF]; 
 	char val[4]; 
-	float value_read = 0;
-
+	uint16_t value_read = 0;
+	float float_value = 0.0;
 	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
 	printf("Opening file: %s\n",buffer); 
 
@@ -137,20 +137,21 @@ int producer2()
 	close(fd); 
 	
 	value_read = atoi(val);
+	float_value = (float)value_read;
 	if(value_read > 4000)
 	{
-		printf("Value is %f\tGas detected!\n",value_read);
+		printf("Value is %d\tGas detected!\n",value_read);
 	}
 	else
 	{
-		printf("Value is %f\tGas not detected!\n",value_read);
+		printf("Value is %d\tGas not detected!\n",value_read);
 	}
 
 	syslog(LOG_INFO,"Message from PRODUCER 2");
 	sem_t* producer2_sem;
 	/* strings written to shared memory */
 
-	number prod2 = {2,value_read};
+	number prod2 = {2,float_value};
 
 	number *prod2_ptr = &prod2;
 
@@ -226,7 +227,7 @@ int consumer()
 				perror("Write of ptr0 to data file failed!");
 				exit(EXIT_FAILURE);
 			}
-	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
+	sprintf(data,"\nID is %d and data acquired is %f",ptr[1].ID,ptr[1].data);
 	if(write(fp, data, strlen(data)) == -1)
 			{
 				perror("Write of ptr1 to data file failed!");
@@ -244,10 +245,10 @@ int consumer()
 int main(void)
 {
 	sem_t *main_sem;
-	pid_t process_id = 0;
-	pid_t sid = 0;
-	pid_t cid = 0;
-	int status = 0;
+//	pid_t process_id = 0;
+//	pid_t sid = 0;
+//	pid_t cid = 0;
+//	int status = 0;
 
 	openlog("SharedMemory",LOG_PID|LOG_CONS,LOG_USER);
 	syslog(LOG_INFO,"Message from MAIN");
@@ -275,37 +276,37 @@ int main(void)
 
 	printf("Creating child process\n");
 	// Create child process
-	process_id = fork();
-	printf("Child process is  = %d\n",process_id);
-	cid = wait(&status);	
-	printf("After wait for PID %d\n",cid);
+//	process_id = fork();
+//	printf("Child process is  = %d\n",process_id);
+//	cid = wait(&status);	
+//	printf("After wait for PID %d\n",cid);
 
 	// Indication of fork() failure
-	if (process_id < 0)
-	{
+//	if (process_id < 0)
+//	{
 		// Return failure in exit status
-		exit(1);
-	}
+//		exit(1);
+//	}
 	// PARENT PROCESS. Need to kill it.
-	if (process_id > 0)
-	{
-		exit(0);
-	}
+//	if (process_id > 0)
+//	{
+//		exit(0);
+//	}
 	//unmask the file mode
-	umask(0);
-	printf("IN CHILD\n");
+//	umask(0);
+//	printf("IN CHILD\n");
 	
 
 	//set new session
-	sid = setsid();
-	if(sid < 0)
-	{
-		printf("SID is less than 0\n");
+//	sid = setsid();
+//	if(sid < 0)
+//	{
+//		printf("SID is less than 0\n");
 		// Return failure
-		exit(1);
-	}
+//		exit(1);
+//	}
 	// Change the current working directory to root.
-	chdir("/");
+//	chdir("/");
 	
 	while(1)
 	{
