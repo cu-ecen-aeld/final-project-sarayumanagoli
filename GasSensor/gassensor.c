@@ -48,6 +48,9 @@ void read_value(unsigned int pin)
 
 int main() 
 { 
-	read_value(4);
+	while(1)
+	{
+		read_value(4);
+	}
 	return 0;
 } 
