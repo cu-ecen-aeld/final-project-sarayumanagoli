@@ -183,7 +183,7 @@ int consumer()
 
 	char *data = malloc(30 * sizeof(char));
 	syslog(LOG_INFO,"Message from CONSUMER");
-	sem_t* consumer_sem;
+	//sem_t* consumer_sem;
 	int fp = 0;
 	fp=creat("/var/tmp/temperature",0755);
 	if(fp < 0)
@@ -212,7 +212,7 @@ int consumer()
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
 	
-	consumer_sem = sem_open(cons_semaphore,0,0666,0);
+	//consumer_sem = sem_open(cons_semaphore,0,0666,0);
 	//sem_post(consumer_sem);
 	printf("Before wait consumer\n");
 	//sem_wait(consumer_sem);
@@ -245,7 +245,7 @@ int consumer()
 				exit(EXIT_FAILURE);
 			}
 	printf("Before sem_close\n");
-	sem_close(consumer_sem);
+	//sem_close(consumer_sem);
 	printf("Sem closed\n");
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
