@@ -44,15 +44,12 @@ typedef struct {
 char *prod1_semaphore = "producer1_sem_main";
 char *prod2_semaphore = "producer2_sem_main";
 char *cons_semaphore = "consumer_sem_main";
+int temp_file;
 
-int producer1() 
-{   
+void temperature_init(void)
+{
 	char check_val[1] = {TEMP_REGISTER};
-	char read_val[2] = {0};
-	int16_t digitalTemp;
-	float tempC;
-	int temp_file;
-	
+
 	printf("\nThis is a test for the TMP102 sensor");
 	if((temp_file = open("/dev/i2c-2",O_RDWR)) < 0)
 	{
@@ -73,6 +70,14 @@ int producer1()
 		exit(EXIT_FAILURE);
 	} 
 	printf("\nReset successful!");
+}
+
+int producer1() 
+{  
+	char read_val[2] = {0};
+	int16_t digitalTemp;
+	float tempC;
+	
 	if((read(temp_file, read_val, 2)) != 2)
 	{
 		perror("\nFailed to read the check value from the configuration register");
@@ -289,7 +294,8 @@ int main(void)
 	{ 
 		printf("FILE CLOSE ERROR\n"); 
 	}
-
+	
+	temperature_init();
 
 //	printf("Creating child process\n");
 	// Create child process
@@ -336,7 +342,6 @@ int main(void)
 		//Calling Consumer
 		printf("Calling consumer\n");		
 		consumer();
-		usleep(500000);
 	}
 	
 	sem_unlink(prod1_semaphore);
