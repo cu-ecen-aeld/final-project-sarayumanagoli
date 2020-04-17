@@ -47,7 +47,7 @@ int producer1()
 	char check_val[1] = {TEMP_REGISTER};
 	char read_val[2] = {0};
 	int16_t digitalTemp;
-	float tempC;
+	//float tempC;
 	int temp_file;
 	
 	printf("\nThis is a test for the TMP102 sensor");
@@ -80,13 +80,13 @@ int producer1()
 	{
 		digitalTemp |= 0xF000;
 	}
-	tempC = digitalTemp * 0.0625;
+	//tempC = digitalTemp * 0.0625;
 
 	close(temp_file);
 
 	syslog(LOG_INFO,"Message from PRODUCER 1");
 	sem_t* producer1_sem;
-	number prod1 = {1,tempC};
+	number prod1 = {1,100};
 
 	number *prod1_ptr = &prod1;
 
@@ -159,7 +159,7 @@ int consumer()
 	sem_wait(consumer_sem);
 	printf("After wait consumer\n");
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
-	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
+	//memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	sem_post(consumer_sem);
 	/* read from the shared memory object */ 
 	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
@@ -168,12 +168,12 @@ int consumer()
 				perror("Write of ptr0 to data file failed!");
 				exit(EXIT_FAILURE);
 			}
-	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
-	if(write(fp, data, strlen(data)) == -1)
-			{
-				perror("Write of ptr1 to data file failed!");
-				exit(EXIT_FAILURE);
-			}
+	//sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
+	//if(write(fp, data, strlen(data)) == -1)
+	//		{
+	//			perror("Write of ptr1 to data file failed!");
+	//			exit(EXIT_FAILURE);
+	//		}
 	sem_close(consumer_sem);
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
@@ -215,7 +215,7 @@ int main(void)
 	}
 
 
-printf("Creating child process\n");
+	printf("Creating child process\n");
 	// Create child process
 	process_id = fork();
 	printf("Child process is  = %d\n",process_id);
@@ -252,24 +252,25 @@ printf("Creating child process\n");
 	while(1)
 	{
 		//Calling Producer 1
+		printf("Calling producer 1\n");
 		producer1();
-		//Calling Producer 2 after child process is forked
+		//Calling Producer 2
+		printf("Calling producer 2\n");
 	    	producer2();
 		//Calling Consumer
+		printf("Calling consumer\n");		
 		consumer();
-		
-		sem_unlink(prod1_semaphore);
-		sem_unlink(prod2_semaphore);
-		sem_unlink(cons_semaphore);
-		printf("Semaphore unlinked!\n");
-
-		// Close stdin. stdout and stderr
-		close(STDIN_FILENO);
-		close(STDOUT_FILENO);
-		close(STDERR_FILENO);
+		usleep(500000);
 	}
+	
+	sem_unlink(prod1_semaphore);
+	sem_unlink(prod2_semaphore);
+	sem_unlink(cons_semaphore);
+	printf("Semaphore unlinked!\n");
 
-
-
+	// Close stdin. stdout and stderr
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
         return 0;
 }
