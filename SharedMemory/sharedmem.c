@@ -35,7 +35,6 @@ char *cons_semaphore = "consumer_sem_main";
 int producer1() 
 {   
 	printf("Message from PRODUCER 1\n");
-	sem_t* producer1_sem;
 	number prod1 = {1,2,"Embedded","Systems"};
 
 	number *prod1_ptr = &prod1;
@@ -48,26 +47,20 @@ int producer1()
 
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
-
+	printf("Producer 1 SHM Opened\n");
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0); 
-
-	producer1_sem = sem_open(prod1_semaphore,0,0666,0);
-	printf("Before wait producer 1\n");
-	//sem_wait(producer1_sem);
-	printf("After wait producer 1\n");
+	printf("Producer 1 MMAP\n");
 	memcpy((void *)(&ptr[0]),(void*)prod1_ptr,sizeof(number));
-	//sem_post(producer1_sem);
-	sem_close(producer1_sem);
+	printf("Producer 1 MEMCPY\n");
 	close(file_share);
-
+	printf("Producer 1 CLOSED File_share\n");
 	return 0; 
 } 
 
 int producer2()
 {
 	printf("Message from PRODUCER 2\n");
-	sem_t* producer2_sem;
 	/* strings written to shared memory */
 
 	number prod2 = {3,4,"Boulder","Colorado"};
@@ -82,26 +75,20 @@ int producer2()
 
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
-
+	printf("Producer 2 SHM Opened\n");
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0);
-
-	producer2_sem = sem_open(prod2_semaphore,0,0666,0);
-	printf("Before wait producer 2\n");
-	//sem_wait(producer2_sem);
-	printf("After wait producer 2\n");
+	printf("Producer 2 MMAP\n");
 	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
-	//sem_post(producer2_sem);	
-	sem_close(producer2_sem);
+	printf("Producer 2 MEMCPY\n");
 	close(file_share);
-
+	printf("Producer 2 CLOSED File_share\n");
 	return 0;
 }
 
 int consumer()
 {
 	printf("Message from CONSUMER\n");
-	sem_t* consumer_sem;
 	
 	number cons;
 	number *cons_ptr = &cons;
@@ -116,16 +103,11 @@ int consumer()
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
-	
-	consumer_sem = sem_open(cons_semaphore,0,0666,0);
-	sem_post(consumer_sem);
-	printf("Before wait consumer\n");
-	//sem_wait(consumer_sem);
-	printf("After wait consumer\n");
-	sem_wait(consumer_sem);	
+	printf("Consumer MMAP\n");
+
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
-	sem_post(consumer_sem);
+	printf("Consumer MEMCPY\n");
 	/* read from the shared memory object */ 
 	printf("%d\n", ptr[0].data0);   
 	printf("%d\n", ptr[0].data1);
@@ -135,19 +117,20 @@ int consumer()
 	printf("%s\n", ptr[0].lastname);
 	printf("%s\n", ptr[1].firstname);
 	printf("%s\n", ptr[1].lastname);
-	//sem_post(consumer_sem);
-	sem_close(consumer_sem);
+
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
+	printf("Unlinked\n");
 	munmap(ptr,sizeof(number));
 	printf("Exiting consumer\n");
 	close(file_share);
+	printf("Consumer CLOSE File_Share\n");
 	return 0;
 }
 
 int main(void)
 {
-	sem_t *main_sem;
+//	sem_t *main_sem;
 //	pid_t process_id = 0;
 //	pid_t sid = 0;
 //	pid_t cid = 0;
@@ -157,19 +140,20 @@ int main(void)
 	syslog(LOG_INFO,"Message from MAIN");
 
 	//int ret;
-	main_sem = sem_open(prod1_semaphore, O_CREAT, 0600, 0);
+/*	main_sem = sem_open(prod1_semaphore, O_CREAT, 0600, 0);
 	sem_close(main_sem);	
 	main_sem = sem_open(prod2_semaphore, O_CREAT, 0600, 0);
 	sem_close(main_sem);	
 	main_sem = sem_open(cons_semaphore, O_CREAT, 0600, 0);
-	sem_close(main_sem);
+	sem_close(main_sem);*/
+
 	int file_share = shm_open("Trial_Share",O_CREAT | O_RDWR, 0666);
 	if(file_share < 0)
 	{ 
 		printf("SHM OPEN Error\n"); 
 	}
 
-	ftruncate(file_share, 4096);
+	ftruncate(file_share, 10000);
 	
 	if (close(file_share) < 0) 
 	{ 
@@ -215,15 +199,15 @@ int main(void)
 	}
 	// Change the current working directory to root.
 	chdir("/");*/
-while(1)
-{
-        producer1();
-    	producer2();
-	consumer();
-}	
-	sem_unlink(prod1_semaphore);
+	while(1)
+	{
+		producer1();
+	    	producer2();
+		consumer();
+	}	
+	/*sem_unlink(prod1_semaphore);
 	sem_unlink(prod2_semaphore);
-	sem_unlink(cons_semaphore);
+	sem_unlink(cons_semaphore);*/
 	printf("Semaphore unlinked!\n");
 
 	// Close stdin. stdout and stderr
