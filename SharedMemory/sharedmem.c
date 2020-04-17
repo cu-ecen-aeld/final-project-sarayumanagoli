@@ -16,21 +16,26 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <errno.h>
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <string.h> 
-#include <fcntl.h> 
-#include <semaphore.h> 
-#include <sys/shm.h> 
-#include <sys/stat.h> 
+#include <semaphore.h>
 #include <sys/wait.h> 
 #include "syslog.h"
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
+#include <sys/types.h>	//for lseeks
+#include <unistd.h>
+#include <stdlib.h>	//for exit status and for malloc
+#include <string.h>	//for strlen
+#include <stdbool.h>	//for boolean values
+#include <sys/stat.h> 	//for stat 
+
+#define DEV_ADDRESS (0x48)
+#define TEMP_REGISTER (0x00)
 
 typedef struct {
-	uint8_t data0;
-	uint8_t data1;
-	char* firstname;
-	char* lastname;
+	uint8_t ID;
+	float data;
 } number;
 
 char *prod1_semaphore = "producer1_sem_main";
@@ -39,9 +44,49 @@ char *cons_semaphore = "consumer_sem_main";
 
 int producer1() 
 {   
+	char check_val[1] = {TEMP_REGISTER};
+	char read_val[2] = {0};
+	int16_t digitalTemp;
+	float tempC;
+	int temp_file;
+	
+	printf("\nThis is a test for the TMP102 sensor");
+	if((temp_file = open("/dev/i2c-2",O_RDWR)) < 0)
+	{
+		perror("\nFailed to open the I2C-2 bus!");
+		exit(EXIT_FAILURE);
+	}
+	printf("\nSuccessfully opened the I2C-2 bus!");
+	if((ioctl(temp_file, I2C_SLAVE, DEV_ADDRESS)) < 0)
+	{
+		perror("\nFailed to connect to the sensor!");
+		exit(EXIT_FAILURE);
+	}
+	printf("\nSuccessfully connected to the sensor!");
+	printf("\nAttempting to reset the read address...");
+	if((write(temp_file, check_val, 1)) != 1)
+	{
+		perror("\nFailed to reset the read address");
+		exit(EXIT_FAILURE);
+	} 
+	printf("\nReset successful!");
+	if((read(temp_file, read_val, 2)) != 2)
+	{
+		perror("\nFailed to read the check value from the configuration register");
+		exit(EXIT_FAILURE);
+	}
+	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
+	if(digitalTemp > 0x7FF)
+	{
+		digitalTemp |= 0xF000;
+	}
+	tempC = digitalTemp * 0.0625;
+
+	close(temp_file);
+
 	syslog(LOG_INFO,"Message from PRODUCER 1");
 	sem_t* producer1_sem;
-	number prod1 = {1,2,"Embedded","Systems"};
+	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;
 
@@ -71,52 +116,29 @@ int producer1()
 
 int producer2()
 {
-	syslog(LOG_INFO,"Message from PRODUCER 2");
-	sem_t* producer2_sem;
-	/* strings written to shared memory */
-
-	number prod2 = {3,4,"Boulder","Colorado"};
-
-	number *prod2_ptr = &prod2;
-
-	/* shared memory file descriptor */
-	int file_share;
-
-	/* pointer to shared memory obect */
-	number *ptr = NULL;
-
-	/* create the shared memory object */
-	file_share = shm_open("Trial_Share", O_RDWR, 0666);
-
-	/* memory map the shared memory object */
-	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0);
-
-	producer2_sem = sem_open(prod2_semaphore,0,0666,0);
-	printf("Before wait producer 2\n");
-	//sem_wait(producer2_sem);
-	printf("After wait producer 2\n");
-	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
-	//sem_post(producer2_sem);	
-	sem_close(producer2_sem);
-	close(file_share);
-
 	return 0;
 }
 
 int consumer()
 {
+
+	char *data = malloc(30 * sizeof(char));
 	syslog(LOG_INFO,"Message from CONSUMER");
 	sem_t* consumer_sem;
-	
+	int fp = 0;
+	fp=creat("/var/tmp/sharedmem.txt",0755);
 	number cons;
 	number *cons_ptr = &cons;
-
 	/* shared memory file descriptor */
 	int file_share;
 
 	/* pointer to shared memory obect */
 	number *ptr = NULL;
 
+	//Open file with appropriate permissions
+        fp=open("/var/tmp/sharedmem.txt",O_RDWR|O_APPEND);
+        printf("Opened\n");
+	
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
 	/* memory map the shared memory object */
@@ -131,19 +153,24 @@ int consumer()
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	sem_post(consumer_sem);
 	/* read from the shared memory object */ 
-	printf("%d\n", ptr[0].data0);   
-	printf("%d\n", ptr[0].data1);
-	printf("%d\n", ptr[1].data0);
-	printf("%d\n", ptr[1].data1);
-	printf("%s\n", ptr[0].firstname);
-	printf("%s\n", ptr[0].lastname);
-	printf("%s\n", ptr[1].firstname);
-	printf("%s\n", ptr[1].lastname);
+	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
+	if(write(fp, data, strlen(data)) == -1)
+			{
+				perror("Write of ptr0 to data file failed!");
+				exit(EXIT_FAILURE);
+			}
+	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
+	if(write(fp, data, strlen(data)) == -1)
+			{
+				perror("Write of ptr1 to data file failed!");
+				exit(EXIT_FAILURE);
+			}
 	sem_close(consumer_sem);
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
 	munmap(ptr,sizeof(number));
 	printf("Exiting consumer\n");
+	close(fp);
 	return 0;
 }
 
