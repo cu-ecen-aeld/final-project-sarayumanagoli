@@ -35,7 +35,7 @@ void read_value(unsigned int pin)
 	close(fd); 
 	
 	value_read = atoi(val);
-	if(value_read > 600)
+	if(value_read > 4000)
 	{
 		printf("Value is %d\tGas detected!\n",value_read);
 	}
