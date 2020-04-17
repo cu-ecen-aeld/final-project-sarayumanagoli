@@ -33,6 +33,9 @@
 #define DEV_ADDRESS (0x48)
 #define TEMP_REGISTER (0x00)
 
+#define MAX_BUF 200 
+#define SYSFS_ADC_DIR "/sys/bus/iio/devices/iio:device0/in_voltage4_raw" 
+
 typedef struct {
 	uint8_t ID;
 	float data;
@@ -47,7 +50,7 @@ int producer1()
 	char check_val[1] = {TEMP_REGISTER};
 	char read_val[2] = {0};
 	int16_t digitalTemp;
-	//float tempC;
+	float tempC;
 	int temp_file;
 	
 	printf("\nThis is a test for the TMP102 sensor");
@@ -80,13 +83,13 @@ int producer1()
 	{
 		digitalTemp |= 0xF000;
 	}
-	//tempC = digitalTemp * 0.0625;
+	tempC = digitalTemp * 0.0625;
 
 	close(temp_file);
 
 	syslog(LOG_INFO,"Message from PRODUCER 1");
 	sem_t* producer1_sem;
-	number prod1 = {1,100};
+	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;
 
@@ -116,6 +119,61 @@ int producer1()
 
 int producer2()
 {
+	uint8_t fd; 
+	char buffer[MAX_BUF]; 
+	char val[4]; 
+	float value_read = 0;
+
+	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
+	printf("Opening file: %s\n",buffer); 
+
+	fd = open(buffer, O_RDONLY); 
+	if (fd < 0) 
+	{ 
+		perror("Unable to get ADC Value\n"); 
+	} 
+
+	read(fd, &val, 4); 
+	close(fd); 
+	
+	value_read = atoi(val);
+	if(value_read > 4000)
+	{
+		printf("Value is %f\tGas detected!\n",value_read);
+	}
+	else
+	{
+		printf("Value is %f\tGas not detected!\n",value_read);
+	}
+
+	syslog(LOG_INFO,"Message from PRODUCER 2");
+	sem_t* producer2_sem;
+	/* strings written to shared memory */
+
+	number prod2 = {2,value_read};
+
+	number *prod2_ptr = &prod2;
+
+	/* shared memory file descriptor */
+	int file_share;
+
+	/* pointer to shared memory obect */
+	number *ptr = NULL;
+
+	/* create the shared memory object */
+	file_share = shm_open("Trial_Share", O_RDWR, 0666);
+
+	/* memory map the shared memory object */
+	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0);
+
+	producer2_sem = sem_open(prod2_semaphore,0,0666,0);
+	printf("Before wait producer 2\n");
+	//sem_wait(producer2_sem);
+	printf("After wait producer 2\n");
+	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
+	//sem_post(producer2_sem);	
+	sem_close(producer2_sem);
+	close(file_share);
 	return 0;
 }
 
@@ -168,12 +226,12 @@ int consumer()
 				perror("Write of ptr0 to data file failed!");
 				exit(EXIT_FAILURE);
 			}
-	//sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
-	//if(write(fp, data, strlen(data)) == -1)
-	//		{
-	//			perror("Write of ptr1 to data file failed!");
-	//			exit(EXIT_FAILURE);
-	//		}
+	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
+	if(write(fp, data, strlen(data)) == -1)
+			{
+				perror("Write of ptr1 to data file failed!");
+				exit(EXIT_FAILURE);
+			}
 	sem_close(consumer_sem);
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
