@@ -248,10 +248,10 @@ int consumer()
 	//sem_close(consumer_sem);
 	printf("Sem closed\n");
 	/* remove the shared memory object */
-	shm_unlink("Trial_Share");
-	printf("SHM Unlinked!\n");
-	munmap(ptr,sizeof(number));
-	printf("Exiting consumer\n");
+//	shm_unlink("Trial_Share");
+//	printf("SHM Unlinked!\n");
+//	munmap(ptr,sizeof(number));
+//	printf("Exiting consumer\n");
 	close(fp);
 	printf("Closed file!\n");
 	free(data);	
@@ -291,7 +291,7 @@ int main(void)
 	}
 
 
-	printf("Creating child process\n");
+//	printf("Creating child process\n");
 	// Create child process
 //	process_id = fork();
 //	printf("Child process is  = %d\n",process_id);
