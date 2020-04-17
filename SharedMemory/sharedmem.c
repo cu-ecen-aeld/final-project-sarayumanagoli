@@ -90,7 +90,7 @@ int producer1()
 	}
 	tempC = digitalTemp * 0.0625;
 
-	close(temp_file);
+	//close(temp_file);
 
 	syslog(LOG_INFO,"Message from PRODUCER 1");
 	sem_t* producer1_sem;
