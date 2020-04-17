@@ -1,250 +1,53 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
+// Course : Advanced Embedded Software Development
+// Final Project : GAS SENSOR INTERFACE
+// Author : Sarayu Managoli (SAMA2321)
+// Code Reference : http://eliaradeverydayembedded.blogspot.com/2017/08/how-to-configure-adc-for-beaglebone-in.html
+
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <sys/types.h> 
+#include <sys/stat.h> 
+#include <fcntl.h> 
+#include <unistd.h> 
 #include <stdint.h>
 
-#define GAS_DATA   (69)
+#define MAX_BUF 200 
 
-//#include "../inc/gpio.h"
+#define SYSFS_ADC_DIR "/sys/bus/iio/devices/iio:device0/in_voltage4_raw" 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <poll.h>
+void read_value(unsigned int pin) 
+{ 
+	uint8_t fd; 
+	char buffer[MAX_BUF]; 
+	char val[4]; 
+	uint16_t value_read = 0;
 
- /****************************************************************
- * Constants
- ****************************************************************/
+	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
+	printf("Opening file: %s\n",buffer); 
 
-#define SYSFS_GPIO_DIR "/sys/class/gpio"
-#define MAX_BUF 64
-#define GPIO_DIR_INPUT  (0)
-#define GPIO_DIR_OUTPUT (1)
+	fd = open(buffer, O_RDONLY); 
+	if (fd < 0) 
+	{ 
+		perror("Unable to get ADC Value\n"); 
+	} 
 
-/****************************************************************
- * gpio_export
- ****************************************************************/
-int gpio_export(unsigned int gpio)
-{
-    int fd, len;
-    char buf[MAX_BUF];
-
-    fd = open(SYSFS_GPIO_DIR "/export", O_WRONLY);
-    if (fd < 0) {
-        perror("gpio/export");
-        return fd;
-    }
-
-    len = snprintf(buf, sizeof(buf), "%d", gpio);
-    write(fd, buf, len);
-    close(fd);
-
-    return 0;
-}
-
-/****************************************************************
- * gpio_unexport
- ****************************************************************/
-int gpio_unexport(unsigned int gpio)
-{
-    int fd, len;
-    char buf[MAX_BUF];
-
-    fd = open(SYSFS_GPIO_DIR "/unexport", O_WRONLY);
-    if (fd < 0) {
-        perror("gpio/export");
-        return fd;
-    }
-
-    len = snprintf(buf, sizeof(buf), "%d", gpio);
-    write(fd, buf, len);
-    close(fd);
-    return 0;
-}
-
-/****************************************************************
- * gpio_set_dir
- ****************************************************************/
-int gpio_set_dir(unsigned int gpio, unsigned int out_flag)
-{
-	int fd, len;
-	char buf[MAX_BUF];
-
-	len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR  "/gpio%d/direction", gpio);
-	printf("%d\n",len);
-	fd = open(buf, O_WRONLY);
-	if (fd < 0) {
-		perror("gpio/direction");
-		return fd;
+	read(fd, &val, 4); 
+	close(fd); 
+	
+	value_read = atoi(val);
+	if(value_read > 600)
+	{
+		printf("Value is %d\tGas detected!\n",value_read);
 	}
-
-	if (out_flag)
-	write(fd, "out", 4);
 	else
-	write(fd, "in", 3);
+	{
+		printf("Value is %d\tGas not detected!\n",value_read);
+	}
+} 
 
-	close(fd);
+
+int main() 
+{ 
+	read_value(4);
 	return 0;
-}
-
-/****************************************************************
- * gpio_set_value
- ****************************************************************/
-int gpio_set_value(unsigned int gpio, unsigned int value)
-{
-    int fd, len;
-    char buf[MAX_BUF];
-
-    len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-	printf("%d\n",len);
-    fd = open(buf, O_WRONLY);
-    if (fd < 0) {
-        perror("gpio/set-value");
-        return fd;
-    }
-
-    if (value)
-        write(fd, "1", 2);
-    else
-        write(fd, "0", 2);
-
-    close(fd);
-    return 0;
-}
-
-/****************************************************************
- * gpio_get_value
- ****************************************************************/
-
-int gpio_get_value_fd(int fd, unsigned int *value)
-{
-    char ch;
-
-    read(fd, &ch, 1);
-
-    if (ch != '0') {
-        *value = 1;
-    } else {
-        *value = 0;
-    }
-
-    return 0;
-}
-
-int gpio_get_value(unsigned int gpio, unsigned int *value)
-{
-    int fd, len;
-    char buf[MAX_BUF];
-
-    len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-	printf("%d\n",len);
-    fd = open(buf, O_RDONLY);
-    if (fd < 0) {
-        perror("gpio/get-value");
-        return fd;
-    }
-
-    gpio_get_value_fd(fd, value);
-
-    close(fd);
-    return 0;
-}
-
-
-/****************************************************************
- * gpio_set_edge
- ****************************************************************/
-
-int gpio_set_edge(unsigned int gpio, const char *edge)
-{
-    int fd, len;
-    char buf[MAX_BUF];
-
-    len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/edge", gpio);
-	printf("%d\n",len);
-    fd = open(buf, O_WRONLY);
-    if (fd < 0) {
-        perror("gpio/set-edge");
-        return fd;
-    }
-
-    write(fd, edge, strlen(edge) + 1);
-    close(fd);
-    return 0;
-}
-
-/****************************************************************
- * gpio_fd_open
- ****************************************************************/
-
-int gpio_fd_open(unsigned int gpio)
-{
-    int fd, len;
-    char buf[MAX_BUF];
-
-    len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-	printf("%d\n",len);
-    fd = open(buf, O_RDONLY | O_NONBLOCK );
-    if (fd < 0) {
-        perror("gpio/fd_open");
-    }
-    return fd;
-}
-
-/****************************************************************
- * gpio_fd_close
- ****************************************************************/
-
-int gpio_fd_close(int fd)
-{
-    return close(fd);
-}
-
-int main()
-{
-	int ret = 0;
-	unsigned int gas_data = 0xFFFF;
-	if((ret = gpio_export(GAS_DATA)) != 0)
-	{
-		printf("Export error\n");
-		exit(1);
-	}
-
-	if((ret = gpio_set_dir(GAS_DATA, GPIO_DIR_INPUT)) != 0)
-	{
-		printf("Direction set error\n");
-		exit(1);
-	}
-
-	while(1)
-	{
-		if((ret = gpio_get_value(GAS_DATA, &gas_data)) != 0)
-		{
-		    printf("Get value error!\n");
-		    exit(1);
-		}
-
-		if(gas_data == 1)
-		{
-		    printf("Detected?\n");
-		    
-		}
-		else
-		{
-		    printf("Not Detected?\n");
-		}
-		usleep(500000);
-	}
-	if((ret = gpio_unexport(GAS_DATA)) != 0)
-	{
-		perror("gpio_unexport");
-		exit(1);
-	}
-
-	return 0;
-}
-
+} 
