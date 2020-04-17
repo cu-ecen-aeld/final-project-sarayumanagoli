@@ -221,6 +221,7 @@ int consumer()
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Memcpy done!\n");
 	sem_post(consumer_sem);
+	printf("Sem_post done!\n");
 	/* read from the shared memory object */ 
 	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
 	if(write(fp, data, strlen(data)) == -1)
@@ -228,12 +229,22 @@ int consumer()
 				perror("Write of ptr0 to data file failed!");
 				exit(EXIT_FAILURE);
 			}
+	printf("Write 1 done!\n");
+	free(data);
+	printf("Free done!\n");
+	data = (void *)malloc(30 * sizeof(char));
+	if(data <= 0)
+	{
+		printf("Malloc failed\n");
+	}
+	printf("Malloc done!\n");
 	sprintf(data,"\nID is %d and data acquired is %f",ptr[1].ID,ptr[1].data);
 	if(write(fp, data, strlen(data)) == -1)
 			{
 				perror("Write of ptr1 to data file failed!");
 				exit(EXIT_FAILURE);
 			}
+	printf("Before sem_close\n");
 	sem_close(consumer_sem);
 	printf("Sem closed\n");
 	/* remove the shared memory object */
@@ -243,6 +254,8 @@ int consumer()
 	printf("Exiting consumer\n");
 	close(fp);
 	printf("Closed file!\n");
+	free(data);	
+	printf("Free done!\n");
 	return 0;
 }
 
