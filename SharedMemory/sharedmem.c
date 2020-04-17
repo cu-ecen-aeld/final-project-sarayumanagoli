@@ -218,7 +218,8 @@ int consumer()
 	sem_wait(consumer_sem);
 	printf("After wait consumer\n");
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
-	//memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
+	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
+	printf("Memcpy done!\n");
 	sem_post(consumer_sem);
 	/* read from the shared memory object */ 
 	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
@@ -234,11 +235,14 @@ int consumer()
 				exit(EXIT_FAILURE);
 			}
 	sem_close(consumer_sem);
+	printf("Sem closed\n");
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
+	printf("SHM Unlinked!\n");
 	munmap(ptr,sizeof(number));
 	printf("Exiting consumer\n");
 	close(fp);
+	printf("Closed file!\n");
 	return 0;
 }
 
