@@ -213,14 +213,14 @@ int consumer()
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
 	
 	consumer_sem = sem_open(cons_semaphore,0,0666,0);
-	sem_post(consumer_sem);
+	//sem_post(consumer_sem);
 	printf("Before wait consumer\n");
-	sem_wait(consumer_sem);
+	//sem_wait(consumer_sem);
 	printf("After wait consumer\n");
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Memcpy done!\n");
-	sem_post(consumer_sem);
+	//sem_post(consumer_sem);
 	printf("Sem_post done!\n");
 	/* read from the shared memory object */ 
 	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
