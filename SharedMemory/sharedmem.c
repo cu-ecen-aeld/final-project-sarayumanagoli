@@ -126,7 +126,12 @@ int consumer()
 	syslog(LOG_INFO,"Message from CONSUMER");
 	sem_t* consumer_sem;
 	int fp = 0;
-	fp=creat("/var/tmp/sharedmem.txt",0755);
+	fp=creat("/var/tmp/temperature",0755);
+	if(fp < 0)
+	{
+		perror("Data File creation unsuccessful!");
+		exit(EXIT_FAILURE);
+	}
 	number cons;
 	number *cons_ptr = &cons;
 	/* shared memory file descriptor */
@@ -136,8 +141,12 @@ int consumer()
 	number *ptr = NULL;
 
 	//Open file with appropriate permissions
-        fp=open("/var/tmp/sharedmem.txt",O_RDWR|O_APPEND);
-        printf("Opened\n");
+        fp=open("/var/tmp/temperature",O_RDWR|O_APPEND);
+	if(fp < 0)
+	{
+		perror("Data File open unsuccessful!");
+		exit(EXIT_FAILURE);
+	}
 	
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
@@ -205,8 +214,6 @@ int main(void)
 		printf("FILE CLOSE ERROR\n"); 
 	}
 
-//Calling Producer 1
-        producer1();
 
 printf("Creating child process\n");
 	// Create child process
@@ -241,21 +248,28 @@ printf("Creating child process\n");
 	}
 	// Change the current working directory to root.
 	chdir("/");
-
-//Calling Producer 2 after child process is forked
-    	producer2();
-//Calling Consumer
-	consumer();
 	
-	sem_unlink(prod1_semaphore);
-	sem_unlink(prod2_semaphore);
-	sem_unlink(cons_semaphore);
-	printf("Semaphore unlinked!\n");
+	while(1)
+	{
+		//Calling Producer 1
+		producer1();
+		//Calling Producer 2 after child process is forked
+	    	producer2();
+		//Calling Consumer
+		consumer();
+		
+		sem_unlink(prod1_semaphore);
+		sem_unlink(prod2_semaphore);
+		sem_unlink(cons_semaphore);
+		printf("Semaphore unlinked!\n");
 
-	// Close stdin. stdout and stderr
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
+		// Close stdin. stdout and stderr
+		close(STDIN_FILENO);
+		close(STDOUT_FILENO);
+		close(STDERR_FILENO);
+	}
+
+
 
         return 0;
 }
