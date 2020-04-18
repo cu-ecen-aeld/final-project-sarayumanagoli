@@ -94,6 +94,7 @@ int producer1()
 		digitalTemp |= 0xF000;
 	}
 	tempC = digitalTemp * 0.0625;
+
 	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;
@@ -236,10 +237,9 @@ int consumer()
 				perror("Write of ptr1 to data file failed!");
 				exit(EXIT_FAILURE);
 			}
-
-	/* remove the shared memory object */
+	printf("Write done!\n");
 	shm_unlink("Trial_Share");
-	printf("Unlinked\n");
+	printf("Unlinked!\n");
 	munmap(ptr,sizeof(number));
 	printf("Consumer MUNMAP\n");
 	close(fp);
@@ -321,7 +321,6 @@ void sharedmem(void)
 	// Change the current working directory to root.
 	chdir("/");*/
 
-	temperature_init();
 	producer1();
     	producer2();
 	consumer();
@@ -339,6 +338,7 @@ void sharedmem(void)
 
 int main()
 {
+	temperature_init();
 	while(1)
 	{
 		sharedmem();
