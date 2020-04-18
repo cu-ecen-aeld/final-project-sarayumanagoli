@@ -220,7 +220,7 @@ void consumer()
 	printf("%d\n", ptr[1].ID);
 	printf("%f\n", ptr[1].data);
 
-	sprintf(data, "\nID = %d\tData acquired = %f", ptr[0].ID, ptr[0].data);
+	sprintf(data, "\nSensor ID = %d\tTemperature sensor reading = %f", ptr[0].ID, ptr[0].data);
 	if(write(data_file, data, strlen(data)) == -1)
 	{
 		perror("Write 1 to data file failed!");
@@ -228,7 +228,7 @@ void consumer()
 	}
 	printf("\nData 1 written to file!");
 
-	sprintf(data, "\nID = %d\tData acquired = %f", ptr[1].ID, ptr[1].data);
+	sprintf(data, "\nSensor ID = %d\tGas sensor reading = %f", ptr[1].ID, ptr[1].data);
 	if(write(data_file, data, strlen(data)) == -1)
 	{
 		perror("Write 2 to data file failed!");
