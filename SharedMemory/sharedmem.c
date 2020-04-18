@@ -53,8 +53,8 @@ int producer1()
 	printf("Producer 1 MMAP\n");
 	memcpy((void *)(&ptr[0]),(void*)prod1_ptr,sizeof(number));
 	printf("Producer 1 MEMCPY\n");
-	close(file_share);
-	printf("Producer 1 CLOSED File_share\n");
+	munmap(ptr,sizeof(number));
+	printf("Producer 1 MUNMAP\n");
 	return 0; 
 } 
 
@@ -81,8 +81,8 @@ int producer2()
 	printf("Producer 2 MMAP\n");
 	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
 	printf("Producer 2 MEMCPY\n");
-	close(file_share);
-	printf("Producer 2 CLOSED File_share\n");
+	munmap(ptr,sizeof(number));
+	printf("Producer 2 MUNMAP\n");
 	return 0;
 }
 
@@ -122,13 +122,11 @@ int consumer()
 	shm_unlink("Trial_Share");
 	printf("Unlinked\n");
 	munmap(ptr,sizeof(number));
-	printf("Exiting consumer\n");
-	close(file_share);
-	printf("Consumer CLOSE File_Share\n");
+	printf("Consumer MUNMAP\n");
 	return 0;
 }
 
-int main(void)
+void sharedmem(void)
 {
 //	sem_t *main_sem;
 //	pid_t process_id = 0;
@@ -199,22 +197,27 @@ int main(void)
 	}
 	// Change the current working directory to root.
 	chdir("/");*/
-	while(1)
-	{
-		producer1();
-	    	producer2();
-		consumer();
-	}	
+
+	producer1();
+    	producer2();
+	consumer();
+
 	/*sem_unlink(prod1_semaphore);
 	sem_unlink(prod2_semaphore);
 	sem_unlink(cons_semaphore);*/
 	printf("Semaphore unlinked!\n");
 
 	// Close stdin. stdout and stderr
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-
-        return 0;
+//	close(STDIN_FILENO);
+//	close(STDOUT_FILENO);
+//	close(STDERR_FILENO);
 }
 
+int main()
+{
+	while(1)
+	{
+		sharedmem();
+	}
+	return 0;
+}
