@@ -329,8 +329,8 @@ void sharedmem(void)
 	consumer();
 	
 	
-	shm_unlink("Trial_Share");
-	printf("SHM unlinked!\n");
+//	shm_unlink("Trial_Share");
+//	printf("SHM unlinked!\n");
 
 	/*sem_unlink(prod1_semaphore);
 	sem_unlink(prod2_semaphore);
