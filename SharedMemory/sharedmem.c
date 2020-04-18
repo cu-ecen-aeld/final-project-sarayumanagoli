@@ -238,8 +238,8 @@ int consumer()
 				exit(EXIT_FAILURE);
 			}
 	printf("Write done!\n");
-	shm_unlink("Trial_Share");
-	printf("Unlinked!\n");
+//	shm_unlink("Trial_Share");
+//	printf("Unlinked!\n");
 	munmap(ptr,sizeof(number));
 	printf("Consumer MUNMAP\n");
 	close(fp);
