@@ -46,7 +46,7 @@ char *prod1_semaphore = "producer1_sem_main";
 char *prod2_semaphore = "producer2_sem_main";
 char *cons_semaphore = "consumer_sem_main";
 
-int temp_file;
+int temp_file, data_file;
 
 void temperature_init(void)
 {
@@ -72,6 +72,13 @@ void temperature_init(void)
 		exit(EXIT_FAILURE);
 	} 
 	printf("\nReset successful!");
+}
+
+/* Function to check if a given file exists */
+bool file_exists(char *filename)
+{
+	struct stat buffer;
+	return (stat(filename,&buffer) == 0);
 }
 
 
@@ -183,7 +190,7 @@ void producer2()
 
 void consumer()
 {	
-
+	char *data = malloc(30 * sizeof(char));
 	number cons;
 	number *cons_ptr = &cons;
 
@@ -212,6 +219,22 @@ void consumer()
 	printf("%f\n", ptr[0].data);
 	printf("%d\n", ptr[1].ID);
 	printf("%f\n", ptr[1].data);
+
+	sprintf(data, "\nID = %d\tData acquired = %f", ptr[0].ID, ptr[0].data);
+	if(write(data_file, data, strlen(data)) == -1)
+	{
+		perror("Write 1 to data file failed!");
+		exit(EXIT_FAILURE);
+	}
+	printf("\nData 1 written to file!");
+
+	sprintf(data, "\nID = %d\tData acquired = %f", ptr[1].ID, ptr[1].data);
+	if(write(data_file, data, strlen(data)) == -1)
+	{
+		perror("Write 2 to data file failed!");
+		exit(EXIT_FAILURE);
+	}
+	printf("\nData 2 written to file!");
 
 	printf("Write done!\n");
 	shm_unlink("Trial_Share");
@@ -311,9 +334,34 @@ void sharedmem(void)
 int main()
 {
 	temperature_init();
+	char *file_location = "/var/tmp/temperature";
+
+	if(file_exists(file_location) == true)
+	{
+		remove(file_location);
+	}
+	
+	// Check if the file exists else create a new file
+	if(file_exists(file_location) == false)
+	{
+		data_file = creat(file_location,0755);			// Creating a new file with all permissions granted to the user [4]
+		if(data_file < 0)
+		{
+			perror("Data File creation unsuccessful!");
+			exit(EXIT_FAILURE);
+		}
+	}
+	data_file = open(file_location, O_RDWR|O_APPEND);		
+	// The file is opened in APPEND mode to allow for consecutive writes without overwriting the previous data
+	if(data_file < 0)
+	{
+		perror("Data File open unsuccessful!");
+		exit(EXIT_FAILURE);
+	}
 	while(1)
 	{
 		sharedmem();
 	}
+	close(data_file);
 	return 0;
 }
