@@ -75,7 +75,7 @@ void temperature_init(void)
 }
 
 
-int producer1() 
+void producer1() 
 {   
 	char read_val[2] = {0};
 	int16_t digitalTemp;
@@ -111,14 +111,17 @@ int producer1()
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0); 
 	printf("Producer 1 MMAP\n");
+
+	close(file_share);
+	printf("Closed Trial_Share\n");
+
 	memcpy((void *)(&ptr[0]),(void*)prod1_ptr,sizeof(number));
 	printf("Producer 1 MEMCPY\n");
 	munmap(ptr,sizeof(number));
 	printf("Producer 1 MUNMAP\n");
-	return 0; 
 } 
 
-int producer2()
+void producer2()
 {
 
 	uint8_t fd; 
@@ -169,14 +172,17 @@ int producer2()
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0);
 	printf("Producer 2 MMAP\n");
+
+	close(file_share);
+	printf("Closed Trial_Share\n");
+
 	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
 	printf("Producer 2 MEMCPY\n");
 	munmap(ptr,sizeof(number));
 	printf("Producer 2 MUNMAP\n");
-	return 0;
 }
 
-int consumer()
+void consumer()
 {	
 	char *data = malloc(30 * sizeof(char));
 	int fp = 0;
@@ -212,6 +218,9 @@ int consumer()
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
 	printf("Consumer MMAP\n");
 
+	close(file_share);
+	printf("Closed Trial_Share\n");
+
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Consumer MEMCPY\n");
@@ -238,15 +247,12 @@ int consumer()
 				exit(EXIT_FAILURE);
 			}
 	printf("Write done!\n");
-//	shm_unlink("Trial_Share");
-//	printf("Unlinked!\n");
 	munmap(ptr,sizeof(number));
 	printf("Consumer MUNMAP\n");
 	close(fp);
 	printf("Closed file!\n");
 	free(data);	
 	printf("Free done!\n");
-	return 0;
 }
 
 void sharedmem(void)
@@ -256,9 +262,6 @@ void sharedmem(void)
 //	pid_t sid = 0;
 //	pid_t cid = 0;
 //	int status = 0;
-
-	openlog("SharedMemory",LOG_PID|LOG_CONS,LOG_USER);
-	syslog(LOG_INFO,"Message from MAIN");
 
 	//int ret;
 /*	main_sem = sem_open(prod1_semaphore, O_CREAT, 0600, 0);
@@ -324,11 +327,15 @@ void sharedmem(void)
 	producer1();
     	producer2();
 	consumer();
+	
+	
+	shm_unlink("Trial_Share");
+	printf("SHM unlinked!\n");
 
 	/*sem_unlink(prod1_semaphore);
 	sem_unlink(prod2_semaphore);
 	sem_unlink(cons_semaphore);*/
-	printf("Semaphore unlinked!\n");
+//	printf("Semaphore unlinked!\n");
 
 	// Close stdin. stdout and stderr
 //	close(STDIN_FILENO);
