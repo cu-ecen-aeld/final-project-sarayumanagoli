@@ -1,4 +1,9 @@
-//From https://www.geeksforgeeks.org/posix-shared-memory-api/
+// Course : Advanced Embedded Software Development
+// Final Project : SHARED MEMORY IMPLEMENTATION
+// Author : Sarayu Managoli (SAMA2321)
+// Code Reference : http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-producer-orig.c
+//    		    http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-consumer.c
+//		    https://www.geeksforgeeks.org/posix-shared-memory-api/
 
 #include <stdint.h>
 #include <stdio.h>
@@ -11,31 +16,85 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <errno.h>
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <string.h> 
-#include <fcntl.h> 
-#include <semaphore.h> 
-#include <sys/shm.h> 
-#include <sys/stat.h> 
+#include <semaphore.h>
 #include <sys/wait.h> 
 #include "syslog.h"
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
+#include <sys/types.h>	//for lseeks
+#include <unistd.h>
+#include <stdlib.h>	//for exit status and for malloc
+#include <string.h>	//for strlen
+#include <stdbool.h>	//for boolean values
+#include <sys/stat.h> 	//for stat 
+
+#define DEV_ADDRESS (0x48)
+#define TEMP_REGISTER (0x00)
+
+#define MAX_BUF 200 
+#define SYSFS_ADC_DIR "/sys/bus/iio/devices/iio:device0/in_voltage4_raw" 
 
 typedef struct {
-	uint8_t data0;
-	uint8_t data1;
-	char* firstname;
-	char* lastname;
+	uint8_t ID;
+	float data;
 } number;
+
 
 char *prod1_semaphore = "producer1_sem_main";
 char *prod2_semaphore = "producer2_sem_main";
 char *cons_semaphore = "consumer_sem_main";
 
+int temp_file;
+
+void temperature_init(void)
+{
+	char check_val[1] = {TEMP_REGISTER};
+
+	printf("\nThis is a test for the TMP102 sensor");
+	if((temp_file = open("/dev/i2c-2",O_RDWR)) < 0)
+	{
+		perror("\nFailed to open the I2C-2 bus!");
+		exit(EXIT_FAILURE);
+	}
+	printf("\nSuccessfully opened the I2C-2 bus!");
+	if((ioctl(temp_file, I2C_SLAVE, DEV_ADDRESS)) < 0)
+	{
+		perror("\nFailed to connect to the sensor!");
+		exit(EXIT_FAILURE);
+	}
+	printf("\nSuccessfully connected to the sensor!");
+	printf("\nAttempting to reset the read address...");
+	if((write(temp_file, check_val, 1)) != 1)
+	{
+		perror("\nFailed to reset the read address");
+		exit(EXIT_FAILURE);
+	} 
+	printf("\nReset successful!");
+}
+
+
 int producer1() 
 {   
 	printf("Message from PRODUCER 1\n");
-	number prod1 = {1,2,"Embedded","Systems"};
+
+	char read_val[2] = {0};
+	int16_t digitalTemp;
+	float tempC;
+	
+	if((read(temp_file, read_val, 2)) != 2)
+	{
+		perror("\nFailed to read the check value from the configuration register");
+		exit(EXIT_FAILURE);
+	}
+	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
+	if(digitalTemp > 0x7FF)
+	{
+		digitalTemp |= 0xF000;
+	}
+	tempC = digitalTemp * 0.0625;
+	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;
 
@@ -61,9 +120,37 @@ int producer1()
 int producer2()
 {
 	printf("Message from PRODUCER 2\n");
-	/* strings written to shared memory */
 
-	number prod2 = {3,4,"Boulder","Colorado"};
+	uint8_t fd; 
+	char buffer[MAX_BUF]; 
+	char val[4]; 
+	uint16_t value_read = 0;
+	float float_value = 0.0;
+	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
+	printf("Opening file: %s\n",buffer); 
+
+	fd = open(buffer, O_RDONLY); 
+	if (fd < 0) 
+	{ 
+		perror("Unable to get ADC Value\n"); 
+	} 
+
+	read(fd, &val, 4); 
+	close(fd); 
+	
+	value_read = atoi(val);
+	float_value = (float)value_read;
+	if(value_read > 4000)
+	{
+		printf("Value is %d\tGas detected!\n",value_read);
+	}
+	else
+	{
+		printf("Value is %d\tGas not detected!\n",value_read);
+	}
+
+	/* strings written to shared memory */
+	number prod2 = {2,float_value};
 
 	number *prod2_ptr = &prod2;
 
@@ -90,6 +177,15 @@ int consumer()
 {
 	printf("Message from CONSUMER\n");
 	
+	char *data = malloc(30 * sizeof(char));
+	int fp = 0;
+	fp=creat("/var/tmp/temperature",0755);
+	if(fp < 0)
+	{
+		perror("Data File creation unsuccessful!");
+		exit(EXIT_FAILURE);
+	}
+
 	number cons;
 	number *cons_ptr = &cons;
 
@@ -98,6 +194,14 @@ int consumer()
 
 	/* pointer to shared memory obect */
 	number *ptr = NULL;
+
+	//Open file with appropriate permissions
+        fp=open("/var/tmp/temperature",O_RDWR|O_APPEND);
+	if(fp < 0)
+	{
+		perror("Data File open unsuccessful!");
+		exit(EXIT_FAILURE);
+	}
 
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
@@ -109,20 +213,37 @@ int consumer()
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Consumer MEMCPY\n");
 	/* read from the shared memory object */ 
-	printf("%d\n", ptr[0].data0);   
-	printf("%d\n", ptr[0].data1);
-	printf("%d\n", ptr[1].data0);
-	printf("%d\n", ptr[1].data1);
-	printf("%s\n", ptr[0].firstname);
-	printf("%s\n", ptr[0].lastname);
-	printf("%s\n", ptr[1].firstname);
-	printf("%s\n", ptr[1].lastname);
+	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
+	if(write(fp, data, strlen(data)) == -1)
+			{
+				perror("Write of ptr0 to data file failed!");
+				exit(EXIT_FAILURE);
+			}
+	printf("Write 1 done!\n");
+	free(data);
+	printf("Free done!\n");
+	data = (void *)malloc(30 * sizeof(char));
+	if(data <= 0)
+	{
+		printf("Malloc failed\n");
+	}
+	printf("Malloc done!\n");
+	sprintf(data,"\nID is %d and data acquired is %f",ptr[1].ID,ptr[1].data);
+	if(write(fp, data, strlen(data)) == -1)
+			{
+				perror("Write of ptr1 to data file failed!");
+				exit(EXIT_FAILURE);
+			}
 
 	/* remove the shared memory object */
 	shm_unlink("Trial_Share");
 	printf("Unlinked\n");
 	munmap(ptr,sizeof(number));
 	printf("Consumer MUNMAP\n");
+	close(fp);
+	printf("Closed file!\n");
+	free(data);	
+	printf("Free done!\n");
 	return 0;
 }
 
