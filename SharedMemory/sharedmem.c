@@ -78,10 +78,23 @@ void temperature_init(void)
 void producer1() 
 {   
 	printf("In PRODUCER 1\n");
+	char read_val[2] = {0};
+	int16_t digitalTemp;
+	float tempC;
 	
-	float a = 10;
+	if((read(temp_file, read_val, 2)) != 2)
+	{
+		perror("\nFailed to read the check value from the configuration register");
+		exit(EXIT_FAILURE);
+	}
+	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
+	if(digitalTemp > 0x7FF)
+	{
+		digitalTemp |= 0xF000;
+	}
+	tempC = digitalTemp * 0.0625;
 
-	number prod1 = {1,a};
+	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;
 
@@ -297,7 +310,7 @@ void sharedmem(void)
 
 int main()
 {
-	//temperature_init();
+	temperature_init();
 	while(1)
 	{
 		sharedmem();
