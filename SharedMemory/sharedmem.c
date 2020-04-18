@@ -77,25 +77,11 @@ void temperature_init(void)
 
 void producer1() 
 {   
-	char read_val[2] = {0};
-	int16_t digitalTemp;
-	float tempC;
+	printf("In PRODUCER 1\n");
+	
+	float a = 10;
 
-	printf("Message from PRODUCER 1\n");
-
-	if((read(temp_file, read_val, 2)) != 2)
-	{
-		perror("\nFailed to read the check value from the configuration register");
-		exit(EXIT_FAILURE);
-	}
-	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
-	if(digitalTemp > 0x7FF)
-	{
-		digitalTemp |= 0xF000;
-	}
-	tempC = digitalTemp * 0.0625;
-
-	number prod1 = {1,tempC};
+	number prod1 = {1,a};
 
 	number *prod1_ptr = &prod1;
 
@@ -184,16 +170,6 @@ void producer2()
 
 void consumer()
 {	
-	char *data = malloc(30 * sizeof(char));
-	int fp = 0;
-
-	printf("Message from CONSUMER\n");
-	fp=creat("/var/tmp/temperature",0755);
-	if(fp < 0)
-	{
-		perror("Data File creation unsuccessful!");
-		exit(EXIT_FAILURE);
-	}
 
 	number cons;
 	number *cons_ptr = &cons;
@@ -204,13 +180,6 @@ void consumer()
 	/* pointer to shared memory obect */
 	number *ptr = NULL;
 
-	//Open file with appropriate permissions
-        fp=open("/var/tmp/temperature",O_RDWR|O_APPEND);
-	if(fp < 0)
-	{
-		perror("Data File open unsuccessful!");
-		exit(EXIT_FAILURE);
-	}
 
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
@@ -224,35 +193,18 @@ void consumer()
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Consumer MEMCPY\n");
+
 	/* read from the shared memory object */ 
-	sprintf(data,"\nID is %d and data acquired is %f",ptr[0].ID,ptr[0].data);
-	if(write(fp, data, strlen(data)) == -1)
-			{
-				perror("Write of ptr0 to data file failed!");
-				exit(EXIT_FAILURE);
-			}
-	printf("Write 1 done!\n");
-	free(data);
-	printf("Free done!\n");
-	data = (void *)malloc(30 * sizeof(char));
-	if(data <= 0)
-	{
-		printf("Malloc failed\n");
-	}
-	printf("Malloc done!\n");
-	sprintf(data,"\nID is %d and data acquired is %f",ptr[1].ID,ptr[1].data);
-	if(write(fp, data, strlen(data)) == -1)
-			{
-				perror("Write of ptr1 to data file failed!");
-				exit(EXIT_FAILURE);
-			}
+	printf("%d\n", ptr[0].ID);   
+	printf("%f\n", ptr[0].data);
+	printf("%d\n", ptr[1].ID);
+	printf("%f\n", ptr[1].data);
+
 	printf("Write done!\n");
+	shm_unlink("Trial_Share");
+	printf("SHM unlinked!\n");
 	munmap(ptr,sizeof(number));
 	printf("Consumer MUNMAP\n");
-	close(fp);
-	printf("Closed file!\n");
-	free(data);	
-	printf("Free done!\n");
 }
 
 void sharedmem(void)
@@ -345,7 +297,7 @@ void sharedmem(void)
 
 int main()
 {
-	temperature_init();
+	//temperature_init();
 	while(1)
 	{
 		sharedmem();
