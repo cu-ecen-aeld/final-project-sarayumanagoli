@@ -77,12 +77,12 @@ void temperature_init(void)
 
 int producer1() 
 {   
-	printf("Message from PRODUCER 1\n");
-
 	char read_val[2] = {0};
 	int16_t digitalTemp;
 	float tempC;
-	
+
+	printf("Message from PRODUCER 1\n");
+
 	if((read(temp_file, read_val, 2)) != 2)
 	{
 		perror("\nFailed to read the check value from the configuration register");
@@ -119,13 +119,15 @@ int producer1()
 
 int producer2()
 {
-	printf("Message from PRODUCER 2\n");
 
 	uint8_t fd; 
 	char buffer[MAX_BUF]; 
 	char val[4]; 
 	uint16_t value_read = 0;
 	float float_value = 0.0;
+
+	printf("Message from PRODUCER 2\n");
+
 	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
 	printf("Opening file: %s\n",buffer); 
 
@@ -174,11 +176,11 @@ int producer2()
 }
 
 int consumer()
-{
-	printf("Message from CONSUMER\n");
-	
+{	
 	char *data = malloc(30 * sizeof(char));
 	int fp = 0;
+
+	printf("Message from CONSUMER\n");
 	fp=creat("/var/tmp/temperature",0755);
 	if(fp < 0)
 	{
@@ -319,6 +321,7 @@ void sharedmem(void)
 	// Change the current working directory to root.
 	chdir("/");*/
 
+	temperature_init();
 	producer1();
     	producer2();
 	consumer();
