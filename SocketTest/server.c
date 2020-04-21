@@ -59,7 +59,7 @@ void sig_handler(int signo)
 void func(int sockfd) 
 {  
 	char buff[MAX];
-	int n = 1, i; 
+	int n = 1; 
 	// infinite loop for chat 
 	while(signal_flag != true) 
 	{ 
@@ -72,8 +72,8 @@ void func(int sockfd)
 			break;
 		}
 		message.mesg_type = n; 
-		for(i = 0;buff[i] != '\n';i++)
-			message.mesg_text[i] = buff[i];
+		//for(i = 0;buff[i] != '\n';i++)
+		//	message.mesg_text[i] = buff[i];
 		//message.mesg_text = buff;
 		msgsnd(msgid, &message, sizeof(message), 0); 
 		// print buffer which contains the client contents 
