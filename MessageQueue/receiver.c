@@ -22,12 +22,15 @@ int main()
 	// and returns identifier 
 	msgid = msgget(key, 0666 | IPC_CREAT); 
 
-	// msgrcv to receive message 
-	msgrcv(msgid, &message, sizeof(message), 1, 0); 
+	while(1)
+	{
+		// msgrcv to receive message 
+		msgrcv(msgid, &message, sizeof(message), 1, 0); 
 
-	// display the message 
-	printf("Data Received is : %s \n", 
-					message.mesg_text); 
+		// display the message 
+		printf("Data Received is : %s \n", 
+						message.mesg_text); 
+	}
 
 	// to destroy the message queue 
 	msgctl(msgid, IPC_RMID, NULL); 

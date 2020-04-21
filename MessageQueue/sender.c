@@ -13,7 +13,7 @@ struct mesg_buffer {
 int main() 
 { 
 	key_t key; 
-	int msgid, i = 0; 
+	int msgid, i = 0, n = 1; 
 
 	// ftok to generate unique key 
 	key = ftok("progfile", 65); 
@@ -21,17 +21,22 @@ int main()
 	// msgget creates a message queue 
 	// and returns identifier 
 	msgid = msgget(key, 0666 | IPC_CREAT); 
-	message.mesg_type = 1; 
+	while(1)
+	{
+		message.mesg_type = n; 
 
-	printf("Write Data : "); 
-	while((message.mesg_text[i++] = getchar()) != '\n');
-	//gets(message.mesg_text); 
+		printf("Write Data : "); 
+		while((message.mesg_text[i++] = getchar()) != '\n');
+		//gets(message.mesg_text); 
 
-	// msgsnd to send message 
-	msgsnd(msgid, &message, sizeof(message), 0); 
+		// msgsnd to send message 
+		msgsnd(msgid, &message, sizeof(message), 0); 
 
-	// display the message 
-	printf("Data send is : %s \n", message.mesg_text); 
+		// display the message 
+		printf("Data send is : %s \n", message.mesg_text); 
+		n++;
+		i = 0;
+	}
 
 	return 0; 
 } 
