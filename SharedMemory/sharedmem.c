@@ -100,7 +100,7 @@ void producer1()
 		digitalTemp |= 0xF000;
 	}
 	tempC = digitalTemp * 0.0625;
-
+	printf("Temperature = %f",tempC);
 	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;

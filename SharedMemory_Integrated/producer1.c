@@ -101,6 +101,8 @@ void producer1()
 	}
 	tempC = digitalTemp * 0.0625;
 
+	printf("Temperature = %f\n",tempC);
+
 	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;
@@ -192,7 +194,7 @@ void sharedmem(void)
 {
 //	sem_t *main_sem;
 
-	printf("In sharedmem function");
+	printf("In sharedmem function\n");
 	int file_share = shm_open("Trial_Share",O_CREAT | O_RDWR, 0666);
 	if(file_share < 0)
 	{ 
