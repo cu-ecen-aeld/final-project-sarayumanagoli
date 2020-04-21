@@ -80,7 +80,7 @@ int main(int argc, char *argv[2])
 			// Change the file mode mask
 			umask(0);
 
-			openlog("Child_MQ",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs [2],[3]
+			openlog("Daemon_MQ",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs [2],[3]
 
 			// Create a new SID for the child process 
 			sid = setsid();
@@ -136,10 +136,16 @@ int main(int argc, char *argv[2])
 		//message.mesg_text = (char *)malloc(100 * sizeof(char));
 		// msgrcv to receive message 
 		msgrcv(msgid, &message, sizeof(message), n, 0); 
-
-		// display the message 
-		printf("Data Received is : %s \n", 
-						message.mesg_text); 
+		
+		if(argc == 2)
+		{
+			syslog(LOG_INFO,"%s",message.mesg_text);
+		}
+		else
+		{
+			// display the message 
+			printf("Data Received is : %s \n",message.mesg_text); 
+		}
 		n++;
 		//free(message.mesg_text);
 	}
