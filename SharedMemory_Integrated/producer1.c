@@ -52,26 +52,26 @@ void temperature_init(void)
 {
 	char check_val[1] = {TEMP_REGISTER};
 
-	printf("\nThis is a test for the TMP102 sensor");
+	syslog(LOG_INFO,"\nThis is a test for the TMP102 sensor");
 	if((temp_file = open("/dev/i2c-2",O_RDWR)) < 0)
 	{
-		perror("\nFailed to open the I2C-2 bus!");
+		syslog(LOG_INFO,"\nFailed to open the I2C-2 bus!");
 		exit(EXIT_FAILURE);
 	}
-	printf("\nSuccessfully opened the I2C-2 bus!");
+	syslog(LOG_INFO,"\nSuccessfully opened the I2C-2 bus!");
 	if((ioctl(temp_file, I2C_SLAVE, DEV_ADDRESS)) < 0)
 	{
-		perror("\nFailed to connect to the sensor!");
+		syslog(LOG_ERR,"\nFailed to connect to the sensor!");
 		exit(EXIT_FAILURE);
 	}
-	printf("\nSuccessfully connected to the sensor!");
-	printf("\nAttempting to reset the read address...");
+	syslog(LOG_INFO,"\nSuccessfully connected to the sensor!");
+	syslog(LOG_INFO,"\nAttempting to reset the read address...");
 	if((write(temp_file, check_val, 1)) != 1)
 	{
-		perror("\nFailed to reset the read address");
+		syslog(LOG_ERR,"\nFailed to reset the read address");
 		exit(EXIT_FAILURE);
 	} 
-	printf("\nReset successful!");
+	syslog(LOG_INFO,"\nReset successful!");
 }
 
 /* Function to check if a given file exists */
@@ -84,14 +84,14 @@ bool file_exists(char *filename)
 
 void producer1() 
 {   
-	printf("In PRODUCER 1\n");
+	syslog(LOG_INFO,"In PRODUCER 1\n");
 	char read_val[2] = {0};
 	int16_t digitalTemp;
 	float tempC;
 	
 	if((read(temp_file, read_val, 2)) != 2)
 	{
-		perror("\nFailed to read the check value from the configuration register");
+		syslog(LOG_ERR,"\nFailed to read the check value from the configuration register");
 		exit(EXIT_FAILURE);
 	}
 	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
@@ -101,7 +101,7 @@ void producer1()
 	}
 	tempC = digitalTemp * 0.0625;
 
-	printf("Temperature = %f\n",tempC);
+	syslog(LOG_INFO,"Temperature = %f\n",tempC);
 
 	number prod1 = {1,tempC};
 
@@ -115,18 +115,18 @@ void producer1()
 
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
-	printf("Producer 1 SHM Opened\n");
+	syslog(LOG_INFO,"Producer 1 SHM Opened\n");
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0); 
-	printf("Producer 1 MMAP\n");
+	syslog(LOG_INFO,"Producer 1 MMAP\n");
 
 	close(file_share);
-	printf("Closed Trial_Share\n");
+	syslog(LOG_INFO,"Closed Trial_Share\n");
 
 	memcpy((void *)(&ptr[0]),(void*)prod1_ptr,sizeof(number));
-	printf("Producer 1 MEMCPY\n");
+	syslog(LOG_INFO,"Producer 1 MEMCPY\n");
 	munmap(ptr,sizeof(number));
-	printf("Producer 1 MUNMAP\n");
+	syslog(LOG_INFO,"Producer 1 MUNMAP\n");
 } 
 
 void producer2()
@@ -138,15 +138,15 @@ void producer2()
 	uint16_t value_read = 0;
 	float float_value = 0.0;
 
-	printf("Message from PRODUCER 2\n");
+	syslog(LOG_INFO,"Message from PRODUCER 2\n");
 
 	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
-	printf("Opening file: %s\n",buffer); 
+	syslog(LOG_INFO,"Opening file: %s\n",buffer); 
 
 	fd = open(buffer, O_RDONLY); 
 	if (fd < 0) 
 	{ 
-		perror("Unable to get ADC Value\n"); 
+		syslog(LOG_ERR,"Unable to get ADC Value\n"); 
 	} 
 
 	read(fd, &val, 4); 
@@ -156,11 +156,11 @@ void producer2()
 	float_value = (float)value_read;
 	if(value_read > 4000)
 	{
-		printf("Value is %d\tGas detected!\n",value_read);
+		syslog(LOG_INFO,"Value is %d\tGas detected!\n",value_read);
 	}
 	else
 	{
-		printf("Value is %d\tGas not detected!\n",value_read);
+		syslog(LOG_INFO,"Value is %d\tGas not detected!\n",value_read);
 	}
 
 	/* strings written to shared memory */
@@ -176,36 +176,36 @@ void producer2()
 
 	/* create the shared memory object */
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
-	printf("Producer 2 SHM Opened\n");
+	syslog(LOG_INFO,"Producer 2 SHM Opened\n");
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0);
-	printf("Producer 2 MMAP\n");
+	syslog(LOG_INFO,"Producer 2 MMAP\n");
 
 	close(file_share);
-	printf("Closed Trial_Share\n");
+	syslog(LOG_INFO,"Closed Trial_Share\n");
 
 	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
-	printf("Producer 2 MEMCPY\n");
+	syslog(LOG_INFO,"Producer 2 MEMCPY\n");
 	munmap(ptr,sizeof(number));
-	printf("Producer 2 MUNMAP\n");
+	syslog(LOG_INFO,"Producer 2 MUNMAP\n");
 }
 
 void sharedmem(void)
 {
 //	sem_t *main_sem;
 
-	printf("In sharedmem function\n");
+	syslog(LOG_INFO,"In sharedmem function\n");
 	int file_share = shm_open("Trial_Share",O_CREAT | O_RDWR, 0666);
 	if(file_share < 0)
 	{ 
-		printf("SHM OPEN Error\n"); 
+		syslog(LOG_INFO,"SHM OPEN Error\n"); 
 	}
 
 	ftruncate(file_share, 10000);
 	
 	if (close(file_share) < 0) 
 	{ 
-		printf("FILE CLOSE ERROR\n"); 
+		syslog(LOG_INFO,"FILE CLOSE ERROR\n"); 
 	}
 
 
@@ -223,26 +223,29 @@ int main(int argc,char *argv[])
 	int ret = 0;
 	uint8_t result = 0;
 
+	//Open syslog
+	openlog("producer",LOG_PID|LOG_CONS,LOG_USER);
+
 	if(argc == 2)
 		result = strcmp(argv[1], "-d"); //Checking if the first argument is -d to daemonize a process
-	printf("Result = %d\n",result);
+	syslog(LOG_INFO,"Result = %d\n",result);
 
 	temperature_init();
 
-	printf("Creating child process\n");
+	syslog(LOG_INFO,"Creating child process\n");
 	//if(argc == 2 && result == 0) //Checking if there is only 1 argument and if it is '-d'
 	//	{
 		// Create child process
 		process_id = fork();
-		printf("Child process is  = %d\n",process_id);
+		syslog(LOG_INFO,"Child process is  = %d\n",process_id);
 		
 		//cid = waitpid(process_id,&status,0);
 		cid = wait(&status);	
-		printf("After wait for PID %d\n",cid);
+		syslog(LOG_INFO,"After wait for PID %d\n",cid);
 
 		
 		ret = kill(process_id,0);
-		printf("Kill returned %d\n", ret);
+		syslog(LOG_INFO,"Kill returned %d\n", ret);
 
 		// Indication of fork() failure
 		if (process_id < 0)
@@ -257,14 +260,14 @@ int main(int argc,char *argv[])
 		}
 		//unmask the file mode
 		umask(0);
-		printf("IN CHILD\n");
+		syslog(LOG_INFO,"IN CHILD\n");
 		
 
 		//set new session
 		sid = setsid();
 		if(sid < 0)
 		{
-			printf("SID is less than 0\n");
+			syslog(LOG_INFO,"SID is less than 0\n");
 			// Return failure
 			exit(1);
 		}
@@ -276,9 +279,10 @@ int main(int argc,char *argv[])
 	{
 		sharedmem();
 	}
-		// Close stdin. stdout and stderr
-		close(STDIN_FILENO);
-		close(STDOUT_FILENO);
-		close(STDERR_FILENO);
+
+	// Close stdin. stdout and stderr
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
 	return 0;
 }
