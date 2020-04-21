@@ -4,6 +4,7 @@
 #include <sys/ipc.h> 
 #include <sys/msg.h> 
 #include <stdlib.h>
+#include <string.h>
 
 // structure for message queue 
 struct mesg_buffer { 
@@ -22,10 +23,10 @@ int main()
 	// msgget creates a message queue 
 	// and returns identifier 
 	msgid = msgget(key, 0666 | IPC_CREAT); 
+	message.mesg_text = (char *)malloc(100 * sizeof(char));
 	while(1)
 	{
 		message.mesg_type = n; 
-		message.mesg_text = (char *)malloc(100 * sizeof(char));
 		printf("Write Data : "); 
 		while((message.mesg_text[i++] = getchar()) != '\n');
 
@@ -33,12 +34,12 @@ int main()
 		msgsnd(msgid, &message, sizeof(message), 0); 
 
 		// display the message 
-		printf("Data send is : %s \n", message.mesg_text); 
+		printf("Data sent is : %s \n", message.mesg_text); 
 		n++;
 		i = 0;
-		free(message.mesg_text);
+		memset(message.mesg_text, 0x0, (100*sizeof(char)));
 	}
-
+	free(message.mesg_text);
 	return 0; 
 } 
 

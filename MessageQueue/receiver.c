@@ -8,7 +8,7 @@
 // structure for message queue 
 struct mesg_buffer { 
 	long mesg_type; 
-	char *mesg_text; 
+	char mesg_text[100]; 
 } message; 
 
 int main() 
@@ -25,7 +25,7 @@ int main()
 
 	while(1)
 	{
-		message.mesg_text = (char *)malloc(100 * sizeof(char));
+		//message.mesg_text = (char *)malloc(100 * sizeof(char));
 		// msgrcv to receive message 
 		msgrcv(msgid, &message, sizeof(message), n, 0); 
 
@@ -33,7 +33,7 @@ int main()
 		printf("Data Received is : %s \n", 
 						message.mesg_text); 
 		n++;
-		free(message.mesg_text);
+		//free(message.mesg_text);
 	}
 
 	// to destroy the message queue 
