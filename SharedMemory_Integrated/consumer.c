@@ -53,8 +53,8 @@ bool file_exists(char *filename)
 void consumer()
 {	
 	char *data = malloc(100 * sizeof(char));
-	number cons;
-	number *cons_ptr = &cons;
+	//number cons;
+	//number *cons_ptr = &cons;
 
 	/* shared memory file descriptor */
 	int file_share;
@@ -72,8 +72,8 @@ void consumer()
 	close(file_share);
 	printf("Closed Trial_Share\n");
 
-	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
-	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
+	//memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
+	//memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Consumer MEMCPY\n");
 
 	/* read from the shared memory object */ 
@@ -113,8 +113,6 @@ void sharedmem(void)
 	{ 
 		syslog(LOG_INFO,"SHM OPEN Error\n"); 
 	}
-
-	ftruncate(file_share, 10000);
 	
 	if (close(file_share) < 0) 
 	{ 
@@ -137,6 +135,31 @@ int main(int argc,char *argv[])
 
 	//Open syslog
 	openlog("producer",LOG_PID|LOG_CONS,LOG_USER);
+
+	char *file_location = "/var/tmp/temperature";
+
+	if(file_exists(file_location) == true)
+	{
+		remove(file_location);
+	}
+	
+	// Check if the file exists else create a new file
+	if(file_exists(file_location) == false)
+	{
+		data_file = creat(file_location,0755);			// Creating a new file with all permissions granted to the user [4]
+		if(data_file < 0)
+		{
+			perror("Data File creation unsuccessful!");
+			exit(EXIT_FAILURE);
+		}
+	}
+	data_file = open(file_location, O_RDWR|O_APPEND);		
+	// The file is opened in APPEND mode to allow for consecutive writes without overwriting the previous data
+	if(data_file < 0)
+	{
+		perror("Data File open unsuccessful!");
+		exit(EXIT_FAILURE);
+	}
 
 	if(argc == 2)
 		result = strcmp(argv[1], "-d"); //Checking if the first argument is -d to daemonize a process
