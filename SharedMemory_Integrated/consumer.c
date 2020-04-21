@@ -69,8 +69,8 @@ void consumer()
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
 	printf("Consumer MMAP\n");
 
-	//close(file_share);
-	//printf("Closed Trial_Share\n");
+	close(file_share);
+	printf("Closed Trial_Share\n");
 
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
@@ -134,7 +134,7 @@ int main(int argc,char *argv[])
 	uint8_t result = 0;
 
 	//Open syslog
-	openlog("producer",LOG_PID|LOG_CONS,LOG_USER);
+	openlog("consumer",LOG_PID|LOG_CONS,LOG_USER);
 
 	char *file_location = "/var/tmp/temperature";
 
