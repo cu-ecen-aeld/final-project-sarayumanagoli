@@ -67,40 +67,42 @@ void consumer()
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
-	syslog(LOG_INFO,"Consumer MMAP\n");
+	printf("Consumer MMAP\n");
 
 	close(file_share);
-	syslog(LOG_INFO,"Closed Trial_Share\n");
+	printf("Closed Trial_Share\n");
 
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
-	syslog(LOG_INFO,"Consumer MEMCPY\n");
+	printf("Consumer MEMCPY\n");
 
 	/* read from the shared memory object */ 
-	syslog(LOG_INFO,"%d\n", ptr[0].ID);   
-	syslog(LOG_INFO,"%f\n", ptr[0].data);
-	syslog(LOG_INFO,"%d\n", ptr[1].ID);
-	syslog(LOG_INFO,"%f\n", ptr[1].data);
+	printf("%d\n", ptr[0].ID);   
+	printf("%f\n", ptr[0].data);
+	printf("%d\n", ptr[1].ID);
+	printf("%f\n", ptr[1].data);
 
 	sprintf(data, "\nSensor ID = %d\tTemperature sensor data= %f", ptr[0].ID, ptr[0].data);
 	if(write(data_file, data, strlen(data)) == -1)
 	{
-		syslog(LOG_ERR,"Write 1 to data file failed!");
+		perror("Write 1 to data file failed!");
 		exit(EXIT_FAILURE);
 	}
-	syslog(LOG_INFO,"\nData 1 written to file!");
+	printf("\nData 1 written to file!");
 
 	sprintf(data, "\nSensor ID = %d\tGas sensor data = %f", ptr[1].ID, ptr[1].data);
 	if(write(data_file, data, strlen(data)) == -1)
 	{
-		syslog(LOG_ERR,"Write 2 to data file failed!");
+		perror("Write 2 to data file failed!");
 		exit(EXIT_FAILURE);
 	}
-	syslog(LOG_INFO,"\nData 2 written to file!\n");
+	printf("\nData 2 written to file!");
 
-	syslog(LOG_INFO,"Write done!\n");
+	printf("Write done!\n");
+	//shm_unlink("Trial_Share");
+	//printf("SHM unlinked!\n");
 	munmap(ptr,sizeof(number));
-	syslog(LOG_INFO,"Consumer MUNMAP\n");
+	printf("Consumer MUNMAP\n");
 }
 
 void sharedmem(void)
@@ -147,7 +149,7 @@ int main(int argc,char *argv[])
 		data_file = creat(file_location,0755);			// Creating a new file with all permissions granted to the user [4]
 		if(data_file < 0)
 		{
-			syslog(LOG_ERR,"Data File creation unsuccessful!");
+			perror("Data File creation unsuccessful!");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -155,7 +157,7 @@ int main(int argc,char *argv[])
 	// The file is opened in APPEND mode to allow for consecutive writes without overwriting the previous data
 	if(data_file < 0)
 	{
-		syslog(LOG_ERR,"Data File open unsuccessful!");
+		perror("Data File open unsuccessful!");
 		exit(EXIT_FAILURE);
 	}
 
@@ -219,4 +221,5 @@ int main(int argc,char *argv[])
 	close(STDERR_FILENO);
 	return 0;
 }
+
 
