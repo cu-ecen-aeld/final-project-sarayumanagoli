@@ -13,7 +13,7 @@ struct mesg_buffer {
 int main() 
 { 
 	key_t key; 
-	int msgid; 
+	int msgid, n = 1; 
 
 	// ftok to generate unique key 
 	key = ftok("progfile", 65); 
@@ -25,11 +25,12 @@ int main()
 	while(1)
 	{
 		// msgrcv to receive message 
-		msgrcv(msgid, &message, sizeof(message), 1, 0); 
+		msgrcv(msgid, &message, sizeof(message), n, 0); 
 
 		// display the message 
 		printf("Data Received is : %s \n", 
 						message.mesg_text); 
+		n++;
 	}
 
 	// to destroy the message queue 
