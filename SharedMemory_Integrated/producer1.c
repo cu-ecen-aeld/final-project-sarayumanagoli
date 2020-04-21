@@ -192,8 +192,7 @@ void sharedmem(void)
 {
 //	sem_t *main_sem;
 
-
-
+	printf("In sharedmem function");
 	int file_share = shm_open("Trial_Share",O_CREAT | O_RDWR, 0666);
 	if(file_share < 0)
 	{ 
@@ -269,15 +268,15 @@ int main(int argc,char *argv[])
 		}
 		// Change the current working directory to root.
 		chdir("/");
-		// Close stdin. stdout and stderr
-		close(STDIN_FILENO);
-		close(STDOUT_FILENO);
-		close(STDERR_FILENO);
+
 	//}
 	while(1)
 	{
 		sharedmem();
 	}
-
+		// Close stdin. stdout and stderr
+		close(STDIN_FILENO);
+		close(STDOUT_FILENO);
+		close(STDERR_FILENO);
 	return 0;
 }
