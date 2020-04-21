@@ -58,25 +58,29 @@ void sig_handler(int signo)
 // Function designed for chat between client and server. 
 void func(int sockfd) 
 {  
+	char buff[MAX];
 	int n = 1, i; 
 	// infinite loop for chat 
 	while(signal_flag != true) 
 	{ 
+		bzero(buff, MAX); 
 		// read the message from client and copy it in buffer 
-		read(sockfd, message.mesg_text, sizeof(message.mesg_text)); 
-		if(message.mesg_text[0] == 0)
+		read(sockfd, buff, sizeof(buff)); 
+		if(buff[0] == 0)
 		{
 			printf("\nNo more data received from the client!\n");
 			break;
 		}
 		message.mesg_type = n; 
-		for(i = 0;message.mesg_text[i] != '\n';i++);
-		message.mesg_text[i] = '\0';
+		for(i = 0;buff[i] != '\n';i++)
+			message.mesg_text[i] = buff[i];
+		//message.mesg_text = buff;
 		msgsnd(msgid, &message, sizeof(message), 0); 
 		// print buffer which contains the client contents 
-		printf("From client: %s\n ", message.mesg_text); 
+		printf("From client: %s\n ", buff); 
 		n++;
 		memset(message.mesg_text, 0x0, (100*sizeof(char)));
+		bzero(buff, MAX); 
 	} 
 } 
 
