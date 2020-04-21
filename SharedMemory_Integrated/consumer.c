@@ -69,8 +69,8 @@ void consumer()
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
 	printf("Consumer MMAP\n");
 
-	close(file_share);
-	printf("Closed Trial_Share\n");
+	//close(file_share);
+	//printf("Closed Trial_Share\n");
 
 	//memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	//memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
@@ -99,8 +99,8 @@ void consumer()
 	printf("\nData 2 written to file!");
 
 	printf("Write done!\n");
-	shm_unlink("Trial_Share");
-	printf("SHM unlinked!\n");
+	//shm_unlink("Trial_Share");
+	//printf("SHM unlinked!\n");
 	munmap(ptr,sizeof(number));
 	printf("Consumer MUNMAP\n");
 }
@@ -219,3 +219,4 @@ int main(int argc,char *argv[])
 	close(STDERR_FILENO);
 	return 0;
 }
+
