@@ -46,4 +46,4 @@ led: LED/led.c
 
 #make clean
 clean:
-	rm -rf helloworld sharedmem sharedmem_integrated server client servertest clienttest TMP102 gassensor led
+	rm -rf helloworld sharedmem producer1 server client servertest clienttest TMP102 gassensor led
