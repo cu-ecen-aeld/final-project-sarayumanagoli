@@ -130,7 +130,7 @@ int main(int argc,char *argv[])
 	pid_t sid = 0;
 	pid_t cid = 0;
 	int status = 0;
-	int ret = 0;
+	//int ret = 0;
 	uint8_t result = 0;
 
 	//Open syslog
@@ -177,8 +177,8 @@ int main(int argc,char *argv[])
 		syslog(LOG_INFO,"After wait for PID %d\n",cid);
 
 		
-		ret = kill(process_id,0);
-		syslog(LOG_INFO,"Kill returned %d\n", ret);
+		//ret = kill(process_id,0);
+		//syslog(LOG_INFO,"Kill returned %d\n", ret);
 
 		// Indication of fork() failure
 		if (process_id < 0)
