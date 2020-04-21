@@ -72,6 +72,7 @@ int main()
 		message.mesg_type = n; 
 		printf("Write Data : "); 
 		while((message.mesg_text[i++] = getchar()) != '\n');
+		message.mesg_text[i] = '\0';
 
 		// msgsnd to send message 
 		msgsnd(msgid, &message, sizeof(message), 0); 
