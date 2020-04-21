@@ -53,8 +53,8 @@ bool file_exists(char *filename)
 void consumer()
 {	
 	char *data = malloc(100 * sizeof(char));
-	//number cons;
-	//number *cons_ptr = &cons;
+	number cons;
+	number *cons_ptr = &cons;
 
 	/* shared memory file descriptor */
 	int file_share;
@@ -72,8 +72,8 @@ void consumer()
 	//close(file_share);
 	//printf("Closed Trial_Share\n");
 
-	//memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
-	//memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
+	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
+	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Consumer MEMCPY\n");
 
 	/* read from the shared memory object */ 
@@ -212,6 +212,8 @@ int main(int argc,char *argv[])
 	{
 		sharedmem();
 	}
+
+	close(data_file);
 
 	// Close stdin. stdout and stderr
 	close(STDIN_FILENO);
