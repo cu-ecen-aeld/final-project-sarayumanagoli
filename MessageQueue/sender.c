@@ -66,7 +66,7 @@ int main()
 	// msgget creates a message queue 
 	// and returns identifier 
 	msgid = msgget(key, 0666 | IPC_CREAT); 
-	//message.mesg_text = (char *)malloc(100 * sizeof(char));
+
 	while(signal_flag != true)
 	{
 		message.mesg_type = n; 

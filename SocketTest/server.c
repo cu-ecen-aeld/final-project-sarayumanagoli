@@ -13,37 +13,106 @@
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <sys/ipc.h> 
+#include <sys/msg.h> 
+
 #define MAX 100
 #define PORT 8080 
 #define SA struct sockaddr 
 
+bool signal_flag = false;
+int msgid, sockfd;
+
+// structure for message queue 
+struct mesg_buffer { 
+	long mesg_type; 
+	char mesg_text[100]; 
+} message; 
+
+void sig_handler(int signo)
+{
+	if(signo == SIGINT)
+	{
+		printf("\nCaught SIGINT!\n");
+		signal_flag = true;
+		// After chatting close the socket 
+		close(sockfd); 
+	}
+	else if(signo == SIGTERM)
+	{
+		printf("\nCaught SIGTERM!\n");
+		signal_flag = true;
+		// After chatting close the socket 
+		close(sockfd); 
+	}
+	else
+	{
+		fprintf(stderr, "\nUnexpected signal!\n");
+		exit(EXIT_FAILURE);
+	}
+}
+
+
 // Function designed for chat between client and server. 
 void func(int sockfd) 
 { 
-	char buff[MAX]; 
-	//int n; 
+	//char buff[MAX]; 
+	int n = 1; 
 	// infinite loop for chat 
-	for (;;) { 
-		bzero(buff, MAX); 
+	while(signal_flag != true) 
+	{ 
+		//bzero(buff, MAX); 
 
 		// read the message from client and copy it in buffer 
-		read(sockfd, buff, sizeof(buff)); 
-		if(buff[0] == 0)
+		read(sockfd, message.mesg_text, sizeof(message.mesg_text)); 
+		if(message.mesg_text[0] == 0)
 		{
 			printf("\nNo more data received from the client!\n");
 			break;
 		}
+		message.mesg_type = n; 
+		//message.mesg_text = buff;
+		msgsnd(msgid, &message, sizeof(message), 0); 
 		// print buffer which contains the client contents 
-		printf("From client: %s\n ", buff); 
-		bzero(buff, MAX); 
+		printf("From client: %s\n ", message.mesg_text); 
+		n++;
+		memset(message.mesg_text, 0x0, (100*sizeof(char)));
+		//bzero(buff, MAX); 
 	} 
 } 
 
 // Driver function 
 int main() 
 { 
-	int sockfd, connfd, len; 
-	struct sockaddr_in servaddr, cli; 
+	int connfd, len; 
+	struct sockaddr_in servaddr, cli;
+	key_t key;  
+	struct sigaction sa;
+
+	// Signal implementations
+	sa.sa_handler = sig_handler;
+	sa.sa_flags = SA_RESTART;
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(SIGINT, &sa, NULL) == -1) 
+	{
+		perror("sigaction: SIGINT");
+		exit(EXIT_FAILURE);
+        } 
+	if (sigaction(SIGTERM, &sa, NULL) == -1) 
+	{
+		perror("sigaction: SIGTERM");
+		exit(EXIT_FAILURE);
+        }
+
+	// ftok to generate unique key 
+	key = ftok("progfile", 65); 
+
+	// msgget creates a message queue 
+	// and returns identifier 
+	msgid = msgget(key, 0666 | IPC_CREAT);  
 
 	// socket create and verification 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0); 
