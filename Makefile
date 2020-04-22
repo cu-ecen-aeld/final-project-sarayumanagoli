@@ -53,8 +53,9 @@ sender: MessageQueue/sender.c
 receiver: MessageQueue/receiver.c
 	$(CC) $(CFLAGS) MessageQueue/receiver.c -o receiver $(LDFLAGS)
 
-lcd: LCD/lcd.c LCD/lcd_gpio.c
-	gcc -o lcd LCD/lcd.c LCD/lcd_gpio.c -I. 
+lcd: LCD/lcd.c
+	$(CC) $(CFLAGS) LCD/lcd.c -o lcd $(LDFLAGS) 
+
 #make clean
 clean:
 	rm -rf helloworld sharedmem producer consumer server client servertest clienttest TMP102 gassensor lcd led sender receiver
