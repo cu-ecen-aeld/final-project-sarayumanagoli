@@ -67,7 +67,7 @@ int main ( int argc, char *argv[] )
 
 	//****************************************************************************************   
 
-	fd = open("/dev/klcd", O_WRONLY | O_NDELAY);
+	fd = open("/dev/lcd", O_WRONLY | O_NDELAY);
 	if(fd < 0){
 		syslog(LOG_ERR,"[User level Debug] ERR: Unable to open klcd \n");
 		return -1;
