@@ -242,6 +242,7 @@ void check_Busy(void)
 		printf("Direction set error for D7\n");
 		exit(1);
 	}	
+	printf("\nD7 is set as input and reading...");
 	while(value == 1)
 	{	
 		data_Read();
@@ -261,10 +262,12 @@ void check_Busy(void)
 void send_Command(int arr[])
 {
 	int ret;
-
+	
+	command_Register();
+	read_Value();	
+	printf("\nCheck if the LCD is not busy");
 	check_Busy();
 	write_Value();
-	command_Register();
 
 	if((ret = gpio_set_value(D0,arr[0])) != 0)
 	{
@@ -397,10 +400,13 @@ void dec_Binary(int n, int arr[])
 void lcd_Init(void)
 {
 	int command[] = {0,0,0,0, 1,1,0,0};
+	printf("\nSend command 1");
 	send_Command(command);
 	usleep(5000);
+	printf("\nSend command 2");
 	send_Command(command);
 	usleep(5000);
+	printf("\nSend command 3");
 	send_Command(command);
 	usleep(5000);
 	
@@ -413,6 +419,7 @@ void lcd_Init(void)
 	command[5] = 1;
 	command[6] = 0;
 	command[7] = 0;
+	printf("\nSend command 4");
 	send_Command(command);
 	usleep(10000);
 
@@ -425,6 +432,7 @@ void lcd_Init(void)
 	command[5] = 0;
 	command[6] = 0;
 	command[7] = 0;
+	printf("\nSend command 5");
 	send_Command(command);
 	usleep(10000);
 
@@ -437,12 +445,16 @@ void lcd_Init(void)
 	command[5] = 0;
 	command[6] = 0;
 	command[7] = 0;
+	printf("\nSend command 6");
 	send_Command(command);
 }
 
 int main()
 {
+	printf("\nPin initialization!");
 	pin_Init();
+	printf("\nPins initializaed successfully!");
+	printf("\nTrying to initialize LCD...");
 	lcd_Init();
 	send_String("Hi");
 	return 0;
