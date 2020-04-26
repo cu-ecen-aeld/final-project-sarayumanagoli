@@ -264,9 +264,9 @@ void send_Command(int arr[])
 	int ret;
 	
 	command_Register();
-	read_Value();	
-	printf("\nCheck if the LCD is not busy");
-	check_Busy();
+	//read_Value();	
+	//printf("\nCheck if the LCD is not busy");
+	//check_Busy();
 	write_Value();
 
 	if((ret = gpio_set_value(D0,arr[0])) != 0)
@@ -316,7 +316,7 @@ void send_Data(int arr[])
 {
 	int ret;
 
-	check_Busy();
+	//check_Busy();
 	write_Value();
 	data_Register();
 
