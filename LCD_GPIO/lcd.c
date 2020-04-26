@@ -15,6 +15,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
 
+int flag = 0;
+
 void pin_Init(void)
 {
 	int ret = 0;
@@ -252,7 +254,7 @@ void check_Busy(void)
 			exit(1);
 		}
 	}
-	printf("\nValue changed!");
+	printf("\nLCD is free!");
 	if((ret = gpio_set_dir(D7, GPIO_DIR_OUTPUT)) != 0)
 	{
 		printf("Direction set error for D7\n");
@@ -265,9 +267,12 @@ void send_Command(int arr[])
 	int ret;
 	
 	command_Register();
-	read_Value();	
-	printf("\nCheck if the LCD is not busy");
-	check_Busy();
+	if(flag == 1)
+	{
+		read_Value();	
+		printf("\nCheck if the LCD is not busy");
+		check_Busy();
+	}
 	write_Value();
 
 	if((ret = gpio_set_value(D0,arr[0])) != 0)
@@ -316,10 +321,13 @@ void send_Command(int arr[])
 void send_Data(int arr[])
 {
 	int ret;
-	command_Register();
-	read_Value();	
-	printf("\nCheck if the LCD is not busy");
-	check_Busy();
+
+	if(flag == 1)
+	{
+		command_Register();
+		read_Value();
+		check_Busy();
+	}
 	data_Register();
 	write_Value();
 
@@ -402,24 +410,24 @@ void dec_Binary(int n, int arr[])
 
 void lcd_Init(void)
 {
-	int command[] = {0,0,0,1, 1,1,0,0};
+	int command[] = {0,0,0,0, 1,1,0,0};
 	printf("\nSend command 1");
-/*	send_Command(command);
+	send_Command(command);
 	usleep(5000);
 	printf("\nSend command 2");
 	send_Command(command);
 	usleep(5000);
-	printf("\nSend command 3"); */
+	printf("\nSend command 3");
 	send_Command(command);
 	usleep(5000);
 	
 //	command = {0,0,0,1, 1,1,0,0};
 	command[0] = 0;
-	command[1] = 1;
-	command[2] = 1;
+	command[1] = 0;
+	command[2] = 0;
 	command[3] = 1;
-	command[4] = 0;
-	command[5] = 0;
+	command[4] = 1;
+	command[5] = 1;
 	command[6] = 0;
 	command[7] = 0;
 	printf("\nSend command 4");
@@ -428,9 +436,9 @@ void lcd_Init(void)
 
 //	command = {1,1,1,1, 0,0,0,0};
 	command[0] = 1;
-	command[1] = 0;
-	command[2] = 0;
-	command[3] = 0;
+	command[1] = 1;
+	command[2] = 1;
+	command[3] = 1;
 	command[4] = 0;
 	command[5] = 0;
 	command[6] = 0;
@@ -440,26 +448,15 @@ void lcd_Init(void)
 	usleep(10000);
 
 //	command = {1,0,0,0, 0,0,0,0};
-	command[0] = 0;
-	command[1] = 1;
-	command[2] = 1;
-	command[3] = 0;
-	command[4] = 0;
-	command[5] = 0;
-	command[6] = 0;
-	command[7] = 0;
-	printf("\nSend command 6");
-	send_Command(command);
-
-	command[0] = 0;
+	command[0] = 1;
 	command[1] = 0;
 	command[2] = 0;
 	command[3] = 0;
 	command[4] = 0;
 	command[5] = 0;
 	command[6] = 0;
-	command[7] = 1;
-	printf("\nSend command 7");
+	command[7] = 0;
+	printf("\nSend command 6");
 	send_Command(command);
 }
 
@@ -470,7 +467,8 @@ int main()
 	printf("\nPins initializaed successfully!");
 	printf("\nTrying to initialize LCD...");
 	lcd_Init();
-	printf("\nTrying to send Hi");
+	printf("\nTrying to send Hi!");
+	flag = 1;
 	send_String("Hi");
 	return 0;
 }
