@@ -206,6 +206,10 @@ int main(int argc,char *argv[])
 		}
 		// Change the current working directory to root.
 		chdir("/");
+		// Close stdin. stdout and stderr
+		close(STDIN_FILENO);
+		close(STDOUT_FILENO);
+		close(STDERR_FILENO);
 
 	}
 	while(1)
@@ -214,11 +218,6 @@ int main(int argc,char *argv[])
 	}
 
 	close(data_file);
-
-	// Close stdin. stdout and stderr
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
 	return 0;
 }
 
