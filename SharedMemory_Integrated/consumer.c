@@ -166,8 +166,8 @@ int main(int argc,char *argv[])
 	syslog(LOG_INFO,"Result = %d\n",result);
 
 	syslog(LOG_INFO,"Creating child process\n");
-	//if(argc == 2 && result == 0) //Checking if there is only 1 argument and if it is '-d'
-	//	{
+	if(argc == 2 && result == 0) //Checking if there is only 1 argument and if it is '-d'
+		{
 		// Create child process
 		process_id = fork();
 		syslog(LOG_INFO,"Child process is  = %d\n",process_id);
@@ -207,7 +207,7 @@ int main(int argc,char *argv[])
 		// Change the current working directory to root.
 		chdir("/");
 
-	//}
+	}
 	while(1)
 	{
 		sharedmem();
