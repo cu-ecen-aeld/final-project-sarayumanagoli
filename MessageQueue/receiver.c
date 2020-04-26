@@ -140,6 +140,7 @@ int main(int argc, char *argv[2])
 		if(argc == 2)
 		{
 			syslog(LOG_INFO,"%s",message.mesg_text);
+			printf("Data Received is : %s \n",message.mesg_text); 
 		}
 		else
 		{
