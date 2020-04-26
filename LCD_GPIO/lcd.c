@@ -442,6 +442,7 @@ void lcd_Init(void)
 
 int main()
 {
+	pin_Init();
 	lcd_Init();
 	send_String("Hi");
 	return 0;
