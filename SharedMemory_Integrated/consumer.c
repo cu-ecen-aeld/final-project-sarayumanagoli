@@ -128,9 +128,7 @@ int main(int argc,char *argv[])
 {
 	pid_t process_id = 0;
 	pid_t sid = 0;
-	pid_t cid = 0;
-	int status = 0;
-	//int ret = 0;
+
 	uint8_t result = 0;
 
 	//Open syslog
@@ -167,19 +165,9 @@ int main(int argc,char *argv[])
 
 	syslog(LOG_INFO,"Creating child process\n");
 	if(argc == 2 && result == 0) //Checking if there is only 1 argument and if it is '-d'
-		{
+	{
 		// Create child process
 		process_id = fork();
-		syslog(LOG_INFO,"Child process is  = %d\n",process_id);
-		
-		//cid = waitpid(process_id,&status,0);
-		cid = wait(&status);	
-		syslog(LOG_INFO,"After wait for PID %d\n",cid);
-
-		
-		//ret = kill(process_id,0);
-		//syslog(LOG_INFO,"Kill returned %d\n", ret);
-
 		// Indication of fork() failure
 		if (process_id < 0)
 		{
@@ -193,25 +181,29 @@ int main(int argc,char *argv[])
 		}
 		//unmask the file mode
 		umask(0);
-		syslog(LOG_INFO,"IN CHILD\n");
-		
+
+		//Open syslog
+
+		openlog("child",LOG_PID|LOG_CONS,LOG_USER);
+		syslog(LOG_INFO,"IN CHILD");
+
 
 		//set new session
 		sid = setsid();
 		if(sid < 0)
 		{
-			syslog(LOG_INFO,"SID is less than 0\n");
 			// Return failure
 			exit(1);
 		}
 		// Change the current working directory to root.
 		chdir("/");
+
 		// Close stdin. stdout and stderr
 		close(STDIN_FILENO);
 		close(STDOUT_FILENO);
 		close(STDERR_FILENO);
-
 	}
+
 	while(1)
 	{
 		sharedmem();
