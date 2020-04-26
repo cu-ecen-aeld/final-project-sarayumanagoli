@@ -4,7 +4,7 @@
 #	(from a Ubuntu PC to a Beaglebone Black ARM target board)
 #
 
-obj-m	:= lcd.o
+obj-m	:= klcd.o
  
 KDIR	:= /lib/modules/$(shell uname -r)/build
 PWD	:= $(shell pwd) 

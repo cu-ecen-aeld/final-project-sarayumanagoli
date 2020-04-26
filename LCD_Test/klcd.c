@@ -30,7 +30,7 @@
 
 #include <linux/delay.h> // delay
 
-#include "lcd.h"
+#include "klcd.h"
 
 #define DRIVER_AUTHOR	"Hong Moon <hsm5xw.gmail.com>"
 #define DRIVER_DESC	"a 16x2 character LCD (HD44780 LCD controller) driver with 4 bit mode"	
