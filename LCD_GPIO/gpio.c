@@ -1,5 +1,8 @@
 #include "gpio.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 /****************************************************************
  * gpio_export
  ****************************************************************/
@@ -50,7 +53,7 @@ int gpio_set_dir(unsigned int gpio, unsigned int out_flag)
 	char buf[MAX_BUF];
 
 	len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR  "/gpio%d/direction", gpio);
-	printf("%d\n",len);
+//	printf("%d\n",len);
 	fd = open(buf, O_WRONLY);
 	if (fd < 0) {
 		perror("gpio/direction");
@@ -75,7 +78,7 @@ int gpio_set_value(unsigned int gpio, unsigned int value)
     char buf[MAX_BUF];
 
     len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-	printf("%d\n",len);
+//	printf("%d\n",len);
     fd = open(buf, O_WRONLY);
     if (fd < 0) {
         perror("gpio/set-value");
@@ -116,7 +119,7 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
     char buf[MAX_BUF];
 
     len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-	printf("%d\n",len);
+//	printf("%d\n",len);
     fd = open(buf, O_RDONLY);
     if (fd < 0) {
         perror("gpio/get-value");
@@ -140,7 +143,7 @@ int gpio_set_edge(unsigned int gpio, const char *edge)
     char buf[MAX_BUF];
 
     len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/edge", gpio);
-	printf("%d\n",len);
+//	printf("%d\n",len);
     fd = open(buf, O_WRONLY);
     if (fd < 0) {
         perror("gpio/set-edge");
@@ -162,7 +165,7 @@ int gpio_fd_open(unsigned int gpio)
     char buf[MAX_BUF];
 
     len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", gpio);
-	printf("%d\n",len);
+//	printf("%d\n",len);
     fd = open(buf, O_RDONLY | O_NONBLOCK );
     if (fd < 0) {
         perror("gpio/fd_open");
@@ -178,3 +181,5 @@ int gpio_fd_close(int fd)
 {
     return close(fd);
 }
+
+#pragma GCC diagnostic pop
