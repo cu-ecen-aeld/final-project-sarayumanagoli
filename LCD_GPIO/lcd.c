@@ -410,54 +410,55 @@ void dec_Binary(int n, int arr[])
 
 void lcd_Init(void)
 {
-	int command[] = {0,0,1,1, 0,0,0,0};
+	int command[] = {0,0,0,0, 1,1,0,0};
 	printf("\nSend command 1");
 	send_Command(command);
-	usleep(5000);
+	usleep(15000);
 	printf("\nSend command 2");
 	send_Command(command);
-	usleep(5000);
+	usleep(15000);
 	printf("\nSend command 3");
 	send_Command(command);
-	usleep(5000);
+	usleep(15000);
 	
 //	command = {0,0,0,1, 1,1,0,0};
 	command[0] = 0;
 	command[1] = 0;
-	command[2] = 1;
+	command[2] = 0;
 	command[3] = 1;
 	command[4] = 1;
-	command[5] = 0;
+	command[5] = 1;
 	command[6] = 0;
 	command[7] = 0;
 	printf("\nSend command 4");
 	send_Command(command);
-	usleep(10000);
+	usleep(15000);
 
 //	command = {1,1,1,1, 0,0,0,0};
-	command[0] = 0;
-	command[1] = 0;
-	command[2] = 0;
-	command[3] = 0;
-	command[4] = 1;
-	command[5] = 1;
-	command[6] = 1;
-	command[7] = 1;
+	command[0] = 1;
+	command[1] = 1;
+	command[2] = 1;
+	command[3] = 1;
+	command[4] = 0;
+	command[5] = 0;
+	command[6] = 0;
+	command[7] = 0;
 	printf("\nSend command 5");
 	send_Command(command);
-	usleep(10000);
+	usleep(15000);
 
 //	command = {1,0,0,0, 0,0,0,0};
-	command[0] = 0;
+	command[0] = 1;
 	command[1] = 0;
 	command[2] = 0;
 	command[3] = 0;
 	command[4] = 0;
 	command[5] = 0;
 	command[6] = 0;
-	command[7] = 1;
+	command[7] = 0;
 	printf("\nSend command 6");
 	send_Command(command);
+	usleep(15000);
 }
 
 int main()
