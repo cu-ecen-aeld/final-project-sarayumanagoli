@@ -81,24 +81,26 @@ void consumer()
 	printf("%f\n", ptr[0].data);
 	printf("%d\n", ptr[1].ID);
 	printf("%f\n", ptr[1].data);
-
-	sprintf(data, "\nSensor ID = %d\tTemperature sensor data= %f", ptr[0].ID, ptr[0].data);
-	if(write(data_file, data, strlen(data)) == -1)
+	
+	if(ptr[1].data != 0)
 	{
-		perror("Write 1 to data file failed!");
-		exit(EXIT_FAILURE);
-	}
-	printf("\nData 1 written to file!");
+		sprintf(data, "\nSensor ID = %d\tTemperature sensor data= %f", ptr[0].ID, ptr[0].data);
+		if(write(data_file, data, strlen(data)) == -1)
+		{
+			perror("Write 1 to data file failed!");
+			exit(EXIT_FAILURE);
+		}
+		printf("\nData 1 written to file!");
 
-	sprintf(data, "\nSensor ID = %d\tGas sensor data = %f", ptr[1].ID, ptr[1].data);
-	if(write(data_file, data, strlen(data)) == -1)
-	{
-		perror("Write 2 to data file failed!");
-		exit(EXIT_FAILURE);
+		sprintf(data, "\nSensor ID = %d\tGas sensor data = %f", ptr[1].ID, ptr[1].data);
+		if(write(data_file, data, strlen(data)) == -1)
+		{
+			perror("Write 2 to data file failed!");
+			exit(EXIT_FAILURE);
+		}
+		printf("\nData 2 written to file!");
+		printf("Write done!\n");
 	}
-	printf("\nData 2 written to file!");
-
-	printf("Write done!\n");
 	//shm_unlink("Trial_Share");
 	//printf("SHM unlinked!\n");
 	munmap(ptr,sizeof(number));
