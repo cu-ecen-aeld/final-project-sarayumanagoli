@@ -51,7 +51,7 @@ void parse_Data(char string[])
 	int sensor_ID, i, equal_sign_count = 1;
 	float sensor_Value;
 	char sensor_Value_string[10];
-	float current_Temperature = 0.0;
+	static float current_Temperature;
 	float temperature_Threshold = 30.00, gas_Threshold = 1500.00;
 	for(i = 0;string[i] != '\0';i++)
 	{
