@@ -94,7 +94,7 @@ int main()
 			perror("Write to data file failed!");
 			exit(EXIT_FAILURE);
 		}
-		printf("\nData written to file!");
+		printf("\nThe temperature in C is %fC and in F is %fF.", tempC, tempF);
 /*		char *read_buffer = malloc(strlen(data) * sizeof(char));
 //		lseek(data_file,0,SEEK_SET);
 		fileread = pread(data_file, read_buffer, strlen(data), len);
