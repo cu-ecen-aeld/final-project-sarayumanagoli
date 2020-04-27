@@ -272,6 +272,7 @@ int main(int argc,char *argv[])
 	while(1)
 	{
 		sharedmem();
+		usleep(500000);
 	}
 
 	return 0;
