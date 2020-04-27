@@ -73,32 +73,22 @@ void consumer()
 	printf("Closed Trial_Share\n");
 
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
-	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Consumer MEMCPY\n");
 
 	/* read from the shared memory object */ 
-	printf("%d\n", ptr[0].ID);   
-	printf("%f\n", ptr[0].data);
-	printf("%d\n", ptr[1].ID);
-	printf("%f\n", ptr[1].data);
-	
-	if(ptr[1].data != 0)
-	{
-		sprintf(data, "\nSensor ID = %d\tTemperature sensor data= %f", ptr[0].ID, ptr[0].data);
-		if(write(data_file, data, strlen(data)) == -1)
-		{
-			perror("Write 1 to data file failed!");
-			exit(EXIT_FAILURE);
-		}
-		printf("\nData 1 written to file!");
 
-		sprintf(data, "\nSensor ID = %d\tGas sensor data = %f", ptr[1].ID, ptr[1].data);
+	printf("%d\n", ptr[0].ID);
+	printf("%f\n", ptr[0].data);
+	
+	if(ptr[0].data != 0)
+	{
+
+		sprintf(data, "\nSensor ID = %d\tGas sensor data = %f", ptr[0].ID, ptr[0].data);
 		if(write(data_file, data, strlen(data)) == -1)
 		{
-			perror("Write 2 to data file failed!");
+			perror("Write to data file failed!");
 			exit(EXIT_FAILURE);
 		}
-		printf("\nData 2 written to file!");
 		printf("Write done!\n");
 	}
 	//shm_unlink("Trial_Share");
