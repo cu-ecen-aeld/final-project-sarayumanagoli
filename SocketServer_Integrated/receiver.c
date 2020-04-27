@@ -13,7 +13,8 @@
 #include <stdlib.h>
 #include "gpio.h"
 
-#define LED   (47)
+#define T_LED   (47)
+#define G_LED   (46)
 
 bool signal_flag = false;
 int msgid;
@@ -47,9 +48,14 @@ void sig_handler(int signo)
 		fprintf(stderr, "\nUnexpected signal!\n");
 		exit(EXIT_FAILURE);
 	}
-	if((ret = gpio_unexport(LED)) != 0)
+	if((ret = gpio_unexport(T_LED)) != 0)
 	{
-		perror("gpio_unexport");
+		perror("gpio_unexport for T_LED");
+		exit(EXIT_FAILURE);
+	}
+	if((ret = gpio_unexport(G_LED)) != 0)
+	{
+		perror("gpio_unexport for G_LED");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -80,17 +86,17 @@ void parse_Data(char string[])
 					if(sensor_Value >= temperature_Threshold)
 					{
 						printf("\n\r*****************ALERT:High Temperature****************");
-						if((ret = gpio_set_value(LED,1)) != 0)
+						if((ret = gpio_set_value(T_LED,1)) != 0)
 						{
-						    perror("Set ON value error!");
+						    perror("Set ON value error for T_LED!");
 						    exit(EXIT_FAILURE);
 						}
 					}
 					else
 					{
-						if((ret = gpio_set_value(LED,0)) != 0)
+						if((ret = gpio_set_value(T_LED,0)) != 0)
 						{
-						    perror("Set OFF value error!");
+						    perror("Set OFF value error for T_LED!");
 						    exit(EXIT_FAILURE);
 						}
 					}			
@@ -102,17 +108,17 @@ void parse_Data(char string[])
 					if(sensor_Value >= gas_Threshold)
 					{
 						printf("\n\r***************** ALERT:Smoke detected with Temperature = %f ****************",current_Temperature);
-						if((ret = gpio_set_value(LED,1)) != 0)
+						if((ret = gpio_set_value(G_LED,1)) != 0)
 						{
-						    perror("Set ON value error!");
+						    perror("Set ON value error for G_LED!");
 						    exit(EXIT_FAILURE);
 						}
 					}
 					else
 					{
-						if((ret = gpio_set_value(LED,0)) != 0)
+						if((ret = gpio_set_value(G_LED,0)) != 0)
 						{
-						    perror("Set OFF value error!");
+						    perror("Set OFF value error for G_LED!");
 						    exit(EXIT_FAILURE);
 						}
 					}
@@ -205,15 +211,26 @@ int main(int argc, char *argv[2])
 		exit(EXIT_FAILURE);
         }
 
-	if((ret = gpio_export(LED)) != 0)
+	if((ret = gpio_export(T_LED)) != 0)
 	{
-		perror("Export error");
+		perror("Export error for T_LED");
 		exit(EXIT_FAILURE);
 	}
 
-	if((ret = gpio_set_dir(LED, GPIO_DIR_OUTPUT)) != 0)
+	if((ret = gpio_set_dir(T_LED, GPIO_DIR_OUTPUT)) != 0)
 	{
-		perror("Direction set error");
+		perror("Direction set error for T_LED");
+		exit(EXIT_FAILURE);
+	}
+	if((ret = gpio_export(G_LED)) != 0)
+	{
+		perror("Export error for G_LED");
+		exit(EXIT_FAILURE);
+	}
+
+	if((ret = gpio_set_dir(G_LED, GPIO_DIR_OUTPUT)) != 0)
+	{
+		perror("Direction set error for G_LED");
 		exit(EXIT_FAILURE);
 	}
 
