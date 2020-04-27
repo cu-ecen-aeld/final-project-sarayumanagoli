@@ -12,7 +12,7 @@ ifeq ($(LDFLAGS),)
 	LDFLAGS = -pthread -lrt
 endif
 
-all: producer consumer servertest clienttest receiver client_demo server_demo
+all: producer consumer servertest clienttest receiver client_demo server_demo TMP102
 
 producer: SocketClient_Integrated/producer.c
 	$(CC) $(CFLAGS) $(INCLUDES) SocketClient_Integrated/producer.c -o producer $(LDFLAGS)
@@ -36,6 +36,9 @@ client_demo:	Test_Files/SocketTest/client.c
 server_demo:	Test_Files/SocketTest/server.c
 	$(CC) $(CFLAGS) Test_Files/SocketTest/server.c -o server_demo $(LDFLAGS)
 
+TMP102:	Test_Files/Temperature_Sensor/TMP102.c
+	$(CC) $(CFLAGS) Test_Files/Temperature_Sensor/TMP102.c -o TMP102 $(LDFLAGS)
+
 #make clean
 clean:
-	rm -rf producer consumer servertest clienttest receiver client_demo server_demo
+	rm -rf producer consumer servertest clienttest receiver client_demo server_demo TMP102
