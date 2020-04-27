@@ -179,8 +179,6 @@ int main(int argc,char *argv[])
 		result = strcmp(argv[1], "-d"); //Checking if the first argument is -d to daemonize a process
 	syslog(LOG_INFO,"Result = %d\n",result);
 
-	temperature_init();
-
 	syslog(LOG_INFO,"Creating child process\n");
 	if(argc == 2 && result == 0) //Checking if there is only 1 argument and if it is '-d'
 	{

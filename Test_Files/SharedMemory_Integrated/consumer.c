@@ -67,16 +67,13 @@ void consumer()
 	file_share = shm_open("Trial_Share", O_RDWR, 0666);
 	/* memory map the shared memory object */
 	ptr = (number *)mmap(0, sizeof(number), PROT_READ, MAP_SHARED, file_share, 0);
-	printf("Consumer MMAP\n");
 
 	close(file_share);
-	printf("Closed Trial_Share\n");
 
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
-	printf("Consumer MEMCPY\n");
 
 	/* read from the shared memory object */ 
-
+	printf("Data read is \n");
 	printf("%d\n", ptr[0].ID);
 	printf("%f\n", ptr[0].data);
 	
@@ -89,12 +86,11 @@ void consumer()
 			perror("Write to data file failed!");
 			exit(EXIT_FAILURE);
 		}
-		printf("Write done!\n");
+		printf("Write to file done!\n");
 	}
 	//shm_unlink("Trial_Share");
 	//printf("SHM unlinked!\n");
 	munmap(ptr,sizeof(number));
-	printf("Consumer MUNMAP\n");
 }
 
 void sharedmem(void)
