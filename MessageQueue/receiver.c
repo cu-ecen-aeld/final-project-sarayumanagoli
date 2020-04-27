@@ -10,6 +10,7 @@
 #include <syslog.h>
 #include <string.h>
 #include <sys/stat.h> //umask
+#include <stdlib.h>
 
 
 bool signal_flag = false;
@@ -43,6 +44,34 @@ void sig_handler(int signo)
 		fprintf(stderr, "\nUnexpected signal!\n");
 		exit(EXIT_FAILURE);
 	}
+}
+
+void parse_Data(char string[])
+{
+	int sensor_ID, i, equal_sign_count = 1;
+	float sensor_Value;
+	char sensor_Value_string[10];
+	for(i = 0;string[i] != '\0';i++)
+	{
+		if(string[i] == '=')
+		{
+			if(equal_sign_count == 1)
+			{
+				sensor_ID = atoi(&string[i+2]);
+				printf("\nSensor ID = %d",sensor_ID);
+				equal_sign_count++;
+			}
+			else if(equal_sign_count == 2)
+			{
+				strncpy(sensor_Value_string, &string[i+2], 10);
+				sensor_Value = strtof(sensor_Value_string, NULL);
+				printf("\nSensor Value = %f",sensor_Value);
+				equal_sign_count = 1;
+				return;
+			}
+		}
+	}
+	return;
 }
 
 int main(int argc, char *argv[2]) 
@@ -144,6 +173,7 @@ int main(int argc, char *argv[2])
 		{
 			// display the message 
 			printf("Data Received is : %s \n",message.mesg_text); 
+			parse_Data(message.mesg_text);
 		}
 		n++;
 	}
