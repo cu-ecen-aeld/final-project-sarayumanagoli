@@ -62,7 +62,7 @@ void read_from_file(int sockfd)
 				perror("Send failed!");
 				exit(EXIT_FAILURE);
 			}	
-			usleep(10000);
+			usleep(500000);
 		}
 		printf("\nNo more data to send!\n");
 		free(read_data);				
@@ -78,7 +78,7 @@ int main(int argc, char *argv[2])
 	const char *daemon = NULL;
 	pid_t pid, sid;
 
-	openlog("Parent_Server",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs
+	openlog("Parent_Client",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs
 
 	if(argc == 2)
 	{
@@ -105,7 +105,7 @@ int main(int argc, char *argv[2])
 			// Change the file mode mask
 			umask(0);
 
-			openlog("Daemon_Server",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs [2],[3]
+			openlog("Daemon_Client",LOG_NDELAY,LOG_USER);			// Opens a connection to the syslogs [2],[3]
 
 			// Create a new SID for the child process 
 			sid = setsid();
