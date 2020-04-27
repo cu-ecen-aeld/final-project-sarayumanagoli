@@ -226,7 +226,7 @@ int main()
 		    printf("Set ON value error!\n");
 		    exit(1);
 		}
-
+		printf("LED ON\n");
 		usleep(500000);
 
 		if((ret = gpio_set_value(LED,0)) != 0)
@@ -234,7 +234,7 @@ int main()
 		    printf("Set OFF value error!\n");
 		    exit(1);
 		}
-
+		printf("LED OFF\n");
 		usleep(500000);
 	}
 	if((ret = gpio_unexport(LED)) != 0)
