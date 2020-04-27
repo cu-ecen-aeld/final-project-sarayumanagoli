@@ -11,7 +11,10 @@
 #include <string.h>
 #include <sys/stat.h> //umask
 #include <stdlib.h>
+#include "gpio.h"
 
+#define T_LED   (47)
+#define G_LED   (46)
 
 bool signal_flag = false;
 int msgid;
@@ -25,6 +28,7 @@ struct mesg_buffer {
 
 void sig_handler(int signo)
 {
+	int ret;
 	if(signo == SIGINT)
 	{
 		printf("\nCaught SIGINT!\n");
@@ -44,14 +48,24 @@ void sig_handler(int signo)
 		fprintf(stderr, "\nUnexpected signal!\n");
 		exit(EXIT_FAILURE);
 	}
+	if((ret = gpio_unexport(T_LED)) != 0)
+	{
+		perror("gpio_unexport for T_LED");
+		exit(EXIT_FAILURE);
+	}
+	if((ret = gpio_unexport(G_LED)) != 0)
+	{
+		perror("gpio_unexport for G_LED");
+		exit(EXIT_FAILURE);
+	}
 }
 
 void parse_Data(char string[])
 {
-	int sensor_ID, i, equal_sign_count = 1;
+	int sensor_ID, i, equal_sign_count = 1, ret;
 	float sensor_Value;
 	char sensor_Value_string[10];
-	float current_Temperature = 0.0;
+	static float current_Temperature;
 	float temperature_Threshold = 30.00, gas_Threshold = 1500.00;
 	for(i = 0;string[i] != '\0';i++)
 	{
@@ -70,14 +84,44 @@ void parse_Data(char string[])
 				if(sensor_ID == 1 && signal_flag != true)
 				{
 					if(sensor_Value >= temperature_Threshold)
+					{
 						printf("\n\r*****************ALERT:High Temperature****************");
+						if((ret = gpio_set_value(T_LED,1)) != 0)
+						{
+						    perror("Set ON value error for T_LED!");
+						    exit(EXIT_FAILURE);
+						}
+					}
+					else
+					{
+						if((ret = gpio_set_value(T_LED,0)) != 0)
+						{
+						    perror("Set OFF value error for T_LED!");
+						    exit(EXIT_FAILURE);
+						}
+					}			
 					printf("\nTemperature Value = %f\n\r",sensor_Value);
 					current_Temperature = sensor_Value;
 				}
 				if(sensor_ID == 2 && signal_flag != true)
 				{
 					if(sensor_Value >= gas_Threshold)
+					{
 						printf("\n\r***************** ALERT:Smoke detected with Temperature = %f ****************",current_Temperature);
+						if((ret = gpio_set_value(G_LED,1)) != 0)
+						{
+						    perror("Set ON value error for G_LED!");
+						    exit(EXIT_FAILURE);
+						}
+					}
+					else
+					{
+						if((ret = gpio_set_value(G_LED,0)) != 0)
+						{
+						    perror("Set OFF value error for G_LED!");
+						    exit(EXIT_FAILURE);
+						}
+					}
 					printf("\nGas Value = %f\n\r",sensor_Value);
 				}
 				equal_sign_count = 1;
@@ -91,7 +135,7 @@ void parse_Data(char string[])
 int main(int argc, char *argv[2]) 
 { 
 	key_t key; 
-	int n = 1; 
+	int n = 1, ret = 0; 
 	struct sigaction sa;
 	const char *daemon = NULL;
 	pid_t pid, sid;
@@ -166,6 +210,29 @@ int main(int argc, char *argv[2])
 		perror("sigaction: SIGTERM");
 		exit(EXIT_FAILURE);
         }
+
+	if((ret = gpio_export(T_LED)) != 0)
+	{
+		perror("Export error for T_LED");
+		exit(EXIT_FAILURE);
+	}
+
+	if((ret = gpio_set_dir(T_LED, GPIO_DIR_OUTPUT)) != 0)
+	{
+		perror("Direction set error for T_LED");
+		exit(EXIT_FAILURE);
+	}
+	if((ret = gpio_export(G_LED)) != 0)
+	{
+		perror("Export error for G_LED");
+		exit(EXIT_FAILURE);
+	}
+
+	if((ret = gpio_set_dir(G_LED, GPIO_DIR_OUTPUT)) != 0)
+	{
+		perror("Direction set error for G_LED");
+		exit(EXIT_FAILURE);
+	}
 
 	// ftok to generate unique key 
 	key = ftok("progfile", 65); 
