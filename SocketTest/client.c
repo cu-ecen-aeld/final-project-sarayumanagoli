@@ -62,7 +62,8 @@ void read_from_file(int sockfd)
 				perror("Send failed!");
 				exit(EXIT_FAILURE);
 			}	
-			usleep(900000);
+			//usleep(900000);
+			sleep(1);
 		}
 		printf("\nNo more data to send!\n");
 		free(read_data);				
