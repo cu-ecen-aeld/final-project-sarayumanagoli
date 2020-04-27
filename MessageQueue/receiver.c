@@ -51,21 +51,35 @@ void parse_Data(char string[])
 	int sensor_ID, i, equal_sign_count = 1;
 	float sensor_Value;
 	char sensor_Value_string[10];
+	float current_Temperature = 0.0;
+	float temperature_Threshold = 30.00, gas_Threshold = 1500.00;
 	for(i = 0;string[i] != '\0';i++)
 	{
-		if(string[i] == '=')
+		if(string[i] == '=' && signal_flag != true)
 		{
-			if(equal_sign_count == 1)
+			if(equal_sign_count == 1 && signal_flag != true)
 			{
 				sensor_ID = atoi(&string[i+2]);
 				printf("\nSensor ID = %d",sensor_ID);
 				equal_sign_count++;
 			}
-			else if(equal_sign_count == 2)
+			else if(equal_sign_count == 2 && signal_flag != true)
 			{
 				strncpy(sensor_Value_string, &string[i+2], 10);
 				sensor_Value = strtof(sensor_Value_string, NULL);
-				printf("\nSensor Value = %f",sensor_Value);
+				if(sensor_ID == 1 && signal_flag != true)
+				{
+					if(sensor_Value >= temperature_Threshold)
+						printf("\n\r*****************ALERT:High Temperature****************");
+					printf("\nTemperature Value = %f\n\r",sensor_Value);
+					current_Temperature = sensor_Value;
+				}
+				if(sensor_ID == 2 && signal_flag != true)
+				{
+					if(sensor_Value >= gas_Threshold)
+						printf("\n\r***************** ALERT:Smoke detected with Temperature = %f ****************",current_Temperature);
+					printf("\nGas Value = %f\n\r",sensor_Value);
+				}
 				equal_sign_count = 1;
 				return;
 			}
