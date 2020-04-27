@@ -74,7 +74,8 @@ void consumer()
 
 	close(file_share);
 	printf("Closed Trial_Share\n");
-
+	
+	/* copies the data read from each sensor */
 	memcpy((void*)cons_ptr,(void*)(&ptr[0]),sizeof(number));
 	memcpy((void*)cons_ptr,(void*)(&ptr[1]),sizeof(number));
 	printf("Consumer MEMCPY\n");
@@ -139,6 +140,7 @@ int main(int argc,char *argv[])
 	//Open syslog
 	openlog("consumer",LOG_PID|LOG_CONS,LOG_USER);
 
+	//Location of the file where data is stored for the client socket to read
 	char *file_location = "/var/tmp/temperature";
 
 	if(file_exists(file_location) == true)

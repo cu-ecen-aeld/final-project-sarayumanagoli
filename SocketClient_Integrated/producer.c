@@ -104,7 +104,8 @@ void producer1()
 	tempC = digitalTemp * 0.0625;
 
 	syslog(LOG_INFO,"Temperature = %f\n",tempC);
-
+	
+	/*Sensor ID and Value stored*/
 	number prod1 = {1,tempC};
 
 	number *prod1_ptr = &prod1;
@@ -127,6 +128,8 @@ void producer1()
 
 	memcpy((void *)(&ptr[0]),(void*)prod1_ptr,sizeof(number));
 	syslog(LOG_INFO,"Producer 1 MEMCPY\n");
+
+	/*Unmap memory*/
 	munmap(ptr,sizeof(number));
 	syslog(LOG_INFO,"Producer 1 MUNMAP\n");
 } 
@@ -141,7 +144,8 @@ void producer2()
 	float float_value = 0.0;
 
 	syslog(LOG_INFO,"Message from PRODUCER 2\n");
-
+	
+	//Contains the file referenced by SYSFS_ADC_DIR	
 	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
 	syslog(LOG_INFO,"Opening file: %s\n",buffer); 
 
@@ -150,13 +154,16 @@ void producer2()
 	{ 
 		syslog(LOG_ERR,"Unable to get ADC Value\n"); 
 	} 
-
+	
+	//Value is read from the buffer
 	read(fd, &val, 4); 
 	close(fd); 
 	
 	value_read = atoi(val);
 	float_value = (float)value_read;
-	if(value_read > 1500)
+	
+	//Valeu above 2500 on ADC indicates gas is detected
+	if(value_read > 2500)
 	{
 		syslog(LOG_INFO,"Value is %d\tGas detected!\n",value_read);
 	}
@@ -165,7 +172,7 @@ void producer2()
 		syslog(LOG_INFO,"Value is %d\tGas not detected!\n",value_read);
 	}
 
-	/* strings written to shared memory */
+	/*Sensor ID and Value stored*/
 	number prod2 = {2,float_value};
 
 	number *prod2_ptr = &prod2;
@@ -188,14 +195,14 @@ void producer2()
 
 	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
 	syslog(LOG_INFO,"Producer 2 MEMCPY\n");
+	
+	/*Unmap memory*/
 	munmap(ptr,sizeof(number));
 	syslog(LOG_INFO,"Producer 2 MUNMAP\n");
 }
 
 void sharedmem(void)
 {
-//	sem_t *main_sem;
-
 	syslog(LOG_INFO,"In sharedmem function\n");
 	int file_share = shm_open("Trial_Share",O_CREAT | O_RDWR, 0666);
 	if(file_share < 0)
@@ -210,7 +217,7 @@ void sharedmem(void)
 		syslog(LOG_INFO,"FILE CLOSE ERROR\n"); 
 	}
 
-
+	//Calling temperature and gas sensor
 	producer1();
     	producer2();
 
@@ -225,8 +232,9 @@ int main(int argc,char *argv[])
 	//Open syslog
 	openlog("producer",LOG_PID|LOG_CONS,LOG_USER);
 
+	//Checking if the first argument is -d to daemonize a process
 	if(argc == 2)
-		result = strcmp(argv[1], "-d"); //Checking if the first argument is -d to daemonize a process
+		result = strcmp(argv[1], "-d"); 
 	syslog(LOG_INFO,"Result = %d\n",result);
 
 	temperature_init();
@@ -274,6 +282,8 @@ int main(int argc,char *argv[])
 	while(1)
 	{
 		sharedmem();
+
+		//Delay of 1 second is added
 		usleep(1000000);
 	}
 
