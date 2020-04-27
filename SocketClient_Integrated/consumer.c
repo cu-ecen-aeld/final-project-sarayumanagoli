@@ -1,9 +1,12 @@
 // Course : Advanced Embedded Software Development
-// Final Project : SHARED MEMORY IMPLEMENTATION
+// Final Project : SHARED MEMORY CONSUMER IMPLEMENTATION INTEGRATED WITH FILE OPERATIONS
 // Author : Sarayu Managoli (SAMA2321)
-// Code Reference : http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-producer-orig.c
-//    		    http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-consumer.c
-//		    https://www.geeksforgeeks.org/posix-shared-memory-api/
+// Reference for Shared Memory Implementation : http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-producer-orig.c
+//    		   				http://www.cse.psu.edu/~deh25/cmpsc473/notes/OSC/Processes/shm-posix-consumer.c
+//						https://www.geeksforgeeks.org/posix-shared-memory-api/
+// Reference for Gas Sensor and ADC : http://eliaradeverydayembedded.blogspot.com/2017/08/how-to-configure-adc-for-beaglebone-in.html
+// Reference for File operations : https://www.geeksforgeeks.org/basics-file-handling-c/
+
 
 #include <stdint.h>
 #include <stdio.h>

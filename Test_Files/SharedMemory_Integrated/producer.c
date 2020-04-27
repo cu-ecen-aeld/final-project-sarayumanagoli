@@ -82,54 +82,7 @@ bool file_exists(char *filename)
 }
 
 
-void producer1() 
-{   
-	syslog(LOG_INFO,"In PRODUCER 1\n");
-	char read_val[2] = {0};
-	int16_t digitalTemp;
-	float tempC;
-	
-	if((read(temp_file, read_val, 2)) != 2)
-	{
-		syslog(LOG_ERR,"\nFailed to read the check value from the configuration register");
-		exit(EXIT_FAILURE);
-	}
-	digitalTemp = (((read_val[0]) << 4) | ((read_val[1]) >> 4));
-	if(digitalTemp > 0x7FF)
-	{
-		digitalTemp |= 0xF000;
-	}
-	tempC = digitalTemp * 0.0625;
-
-	syslog(LOG_INFO,"Temperature = %f\n",tempC);
-
-	number prod1 = {1,tempC};
-
-	number *prod1_ptr = &prod1;
-
-	/* shared memory file descriptor */
-	int file_share; 
-
-	/* pointer to shared memory obect */
-	number *ptr = NULL; 
-
-	/* create the shared memory object */
-	file_share = shm_open("Trial_Share", O_RDWR, 0666);
-	syslog(LOG_INFO,"Producer 1 SHM Opened\n");
-	/* memory map the shared memory object */
-	ptr = (number *)mmap(NULL, sizeof(number), PROT_WRITE, MAP_SHARED, file_share, 0); 
-	syslog(LOG_INFO,"Producer 1 MMAP\n");
-
-	close(file_share);
-	syslog(LOG_INFO,"Closed Trial_Share\n");
-
-	memcpy((void *)(&ptr[0]),(void*)prod1_ptr,sizeof(number));
-	syslog(LOG_INFO,"Producer 1 MEMCPY\n");
-	munmap(ptr,sizeof(number));
-	syslog(LOG_INFO,"Producer 1 MUNMAP\n");
-} 
-
-void producer2()
+void producer()
 {
 
 	uint8_t fd; 
@@ -138,7 +91,7 @@ void producer2()
 	uint16_t value_read = 0;
 	float float_value = 0.0;
 
-	syslog(LOG_INFO,"Message from PRODUCER 2\n");
+	syslog(LOG_INFO,"Message from PRODUCER\n");
 
 	snprintf(buffer, sizeof(buffer), SYSFS_ADC_DIR); 
 	syslog(LOG_INFO,"Opening file: %s\n",buffer); 
@@ -164,7 +117,7 @@ void producer2()
 	}
 
 	/* strings written to shared memory */
-	number prod2 = {2,float_value};
+	number prod2 = {1,float_value};
 
 	number *prod2_ptr = &prod2;
 
@@ -184,7 +137,7 @@ void producer2()
 	close(file_share);
 	syslog(LOG_INFO,"Closed Trial_Share\n");
 
-	memcpy((void *)(&ptr[1]),(void*)prod2_ptr,sizeof(number));
+	memcpy((void *)(&ptr[0]),(void*)prod2_ptr,sizeof(number));
 	syslog(LOG_INFO,"Producer 2 MEMCPY\n");
 	munmap(ptr,sizeof(number));
 	syslog(LOG_INFO,"Producer 2 MUNMAP\n");
@@ -209,8 +162,7 @@ void sharedmem(void)
 	}
 
 
-	producer1();
-    	producer2();
+    	producer();
 
 }
 
@@ -226,8 +178,6 @@ int main(int argc,char *argv[])
 	if(argc == 2)
 		result = strcmp(argv[1], "-d"); //Checking if the first argument is -d to daemonize a process
 	syslog(LOG_INFO,"Result = %d\n",result);
-
-	temperature_init();
 
 	syslog(LOG_INFO,"Creating child process\n");
 	if(argc == 2 && result == 0) //Checking if there is only 1 argument and if it is '-d'
