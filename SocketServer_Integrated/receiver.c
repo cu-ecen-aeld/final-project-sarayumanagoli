@@ -1,5 +1,12 @@
-// C Program for Message Queue (Receiver Process) 
-// Reference - https://www.geeksforgeeks.org/ipc-using-message-queues/
+/********************************************************************************************************************************************************************************************
+*	Author - Gitanjali Suresh
+*	Filename - receiver.c
+*	About - This application is responsible for reading data from the message queue and parsing the data to process sensor readings
+*	Reference - https://www.geeksforgeeks.org/ipc-using-message-queues/
+*		  - https://github.com/cu-ecen-5013/assignment-3-manual-kernel-and-root-filesystem-build-Gitanjali-Suresh/blob/Gitanjali-Suresh_assignment5_submission/server/aesdsocket.c
+********************************************************************************************************************************************************************************************/
+
+/* Standard header files */
 #include <stdio.h> 
 #include <sys/ipc.h> 
 #include <sys/msg.h> 
@@ -11,21 +18,25 @@
 #include <string.h>
 #include <sys/stat.h> //umask
 #include <stdlib.h>
+
+/* User-defined header file */
 #include "gpio.h"
 
-#define T_LED   (47)
-#define G_LED   (46)
+/* LED pin definitions */
+#define T_LED   (47)		//GPIO1_15; (1*32)+15 = 47
+#define G_LED   (46)		//GPIO1_14; (1*32)+14 = 46
 
 bool signal_flag = false;
 int msgid;
 
 // structure for message queue 
-struct mesg_buffer { 
+struct mesg_buffer 
+{ 
 	long mesg_type; 
 	char mesg_text[100]; 
 } message; 
 
-
+// Handler for signals
 void sig_handler(int signo)
 {
 	int ret;
@@ -60,13 +71,14 @@ void sig_handler(int signo)
 	}
 }
 
+// Function to parse the data read from the message queue
 void parse_Data(char string[])
 {
 	int sensor_ID, i, equal_sign_count = 1, ret;
 	float sensor_Value;
 	char sensor_Value_string[10];
 	static float current_Temperature;
-	float temperature_Threshold = 30.00, gas_Threshold = 1500.00;
+	float temperature_Threshold = 30.00, gas_Threshold = 2500.00;
 	for(i = 0;string[i] != '\0';i++)
 	{
 		if(string[i] == '=' && signal_flag != true)
@@ -105,7 +117,21 @@ void parse_Data(char string[])
 				}
 				if(sensor_ID == 2 && signal_flag != true)
 				{
-					if(sensor_Value >= gas_Threshold)
+					if(sensor_Value >= gas_Threshold && current_Temperature >= temperature_Threshold)
+					{
+						printf("\n\r***************** ALERT:Fire detected with Temperature = %f ****************",current_Temperature);
+						if((ret = gpio_set_value(G_LED,1)) != 0)
+						{
+						    perror("Set ON value error for G_LED!");
+						    exit(EXIT_FAILURE);
+						}
+						if((ret = gpio_set_value(T_LED,1)) != 0)
+						{
+						    perror("Set ON value error for T_LED!");
+						    exit(EXIT_FAILURE);
+						}
+					}
+					else if(sensor_Value >= gas_Threshold)
 					{
 						printf("\n\r***************** ALERT:Smoke detected with Temperature = %f ****************",current_Temperature);
 						if((ret = gpio_set_value(G_LED,1)) != 0)
@@ -253,11 +279,10 @@ int main(int argc, char *argv[2])
 		else if(signal_flag != true)
 		{
 			// display the message 
-			printf("Data Received is : %s \n",message.mesg_text); 
+			printf("Data Received is: %s \n",message.mesg_text); 
 			parse_Data(message.mesg_text);
 		}
 		n++;
 	}
 	return 0; 
 } 
-

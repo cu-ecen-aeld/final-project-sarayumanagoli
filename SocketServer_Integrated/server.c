@@ -1,9 +1,10 @@
-/**************************************************************************************
+/*************************************************************************************************************************************************************************************
 * Server TCP Program
-* @file - server.c
-* Reference: https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
-*
-***************************************************************************************/
+* Filename - server.c
+* Author - Gitanjali Suresh
+* Reference - https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
+*           - https://github.com/cu-ecen-5013/assignment-3-manual-kernel-and-root-filesystem-build-Gitanjali-Suresh/blob/Gitanjali-Suresh_assignment5_submission/server/aesdsocket.c
+**************************************************************************************************************************************************************************************/
 #include <stdio.h> 
 #include <netdb.h> 
 #include <netinet/in.h> 
@@ -29,11 +30,13 @@ bool daemon_flag = false;
 int msgid, sockfd;
 
 // structure for message queue 
-struct mesg_buffer { 
+struct mesg_buffer 
+{ 
 	long mesg_type; 
 	char mesg_text[100]; 
 } message; 
 
+/* Handler for the signals */
 void sig_handler(int signo)
 {
 	if(signo == SIGINT)
@@ -64,7 +67,6 @@ void sig_handler(int signo)
 // Function designed for chat between client and server. 
 void func(int sockfd) 
 {  
-	//char buff[MAX];
 	int n = 1; 
 	// infinite loop for chat 
 	while(signal_flag != true) 
@@ -79,10 +81,7 @@ void func(int sockfd)
 			break;
 		}
 		message.mesg_type = n; 
-		//for(i = 0;message.mesg_text[i] != '\n';i++);
-		//message.mesg_text[i] = '\0';
 		msgsnd(msgid, &message, sizeof(message), 0); 
-		// print buffer which contains the client contents 
 		if(daemon_flag == true)
 			syslog(LOG_INFO,"From client: %s", message.mesg_text);
 		else
@@ -92,7 +91,7 @@ void func(int sockfd)
 	} 
 } 
 
-// Driver function 
+// Main function 
 int main(int argc, char *argv[2]) 
 { 
 	int connfd, len; 
