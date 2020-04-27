@@ -133,21 +133,19 @@ int main(int argc, char *argv[2])
 
 	while(signal_flag != true)
 	{
-		//message.mesg_text = (char *)malloc(100 * sizeof(char));
 		// msgrcv to receive message 
 		msgrcv(msgid, &message, sizeof(message), n, 0); 
 		
-		if(argc == 2)
+		if(argc == 2 && signal_flag != true)
 		{
 			syslog(LOG_INFO,"%s",message.mesg_text); 
 		}
-		else
+		else if(signal_flag != true)
 		{
 			// display the message 
 			printf("Data Received is : %s \n",message.mesg_text); 
 		}
 		n++;
-		//free(message.mesg_text);
 	}
 	return 0; 
 } 
