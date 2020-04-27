@@ -207,7 +207,7 @@ int main(int argc,char *argv[])
 	while(1)
 	{
 		sharedmem();
-		usleep(100000);
+		usleep(300000);
 	}
 
 	close(data_file);
