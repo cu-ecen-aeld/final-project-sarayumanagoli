@@ -154,7 +154,7 @@ void producer2()
 	
 	value_read = atoi(val);
 	float_value = (float)value_read;
-	if(value_read > 4000)
+	if(value_read > 1500)
 	{
 		syslog(LOG_INFO,"Value is %d\tGas detected!\n",value_read);
 	}
