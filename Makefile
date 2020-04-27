@@ -21,8 +21,8 @@ consumer: SharedMemory_Integrated/consumer.c
 	$(CC) $(CFLAGS) $(INCLUDES) SharedMemory_Integrated/consumer.c -o consumer $(LDFLAGS)
 
 
-servertest: SocketTest/server.c
-	$(CC) $(CFLAGS) SocketTest/server.c -o servertest $(LDFLAGS)
+servertest: SocketServer_Integrated/server.c
+	$(CC) $(CFLAGS) SocketServer_Integrated/server.c -o servertest $(LDFLAGS)
 
 clienttest: SocketTest/client.c
 	$(CC) $(CFLAGS) SocketTest/client.c -o clienttest $(LDFLAGS)
