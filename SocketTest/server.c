@@ -38,6 +38,7 @@ void sig_handler(int signo)
 {
 	if(signo == SIGINT)
 	{
+		syslog(LOG_INFO,"Caught SIGINT!");
 		printf("\nCaught SIGINT!\n");
 		signal_flag = true;
 		// After chatting close the socket 
@@ -45,6 +46,7 @@ void sig_handler(int signo)
 	}
 	else if(signo == SIGTERM)
 	{
+		syslog(LOG_INFO,"Caught SIGTERM!");
 		printf("\nCaught SIGTERM!\n");
 		signal_flag = true;
 		// After chatting close the socket 
@@ -52,6 +54,7 @@ void sig_handler(int signo)
 	}
 	else
 	{
+		syslog(LOG_INFO,"Unexpected signal!");
 		fprintf(stderr, "\nUnexpected signal!\n");
 		exit(EXIT_FAILURE);
 	}
@@ -180,12 +183,17 @@ int main(int argc, char *argv[2])
 
 	// socket create and verification 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0); 
-	if (sockfd == -1) { 
+	if (sockfd == -1) 
+	{ 
+		syslog(LOG_DEBUG,"Socket creation failed!");
 		printf("socket creation failed...\n"); 
 		exit(0); 
 	} 
 	else
+	{
+		syslog(LOG_DEBUG,"Socket successfully created!");
 		printf("Socket successfully created..\n"); 
+	}
 	bzero(&servaddr, sizeof(servaddr)); 
 
 	// assign IP, PORT 
@@ -196,31 +204,43 @@ int main(int argc, char *argv[2])
 	// Binding newly created socket to given IP and verification 
 	if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) 
 	{ 
+		syslog(LOG_DEBUG,"socket bind failed!");
 		printf("socket bind failed...\n"); 
 		exit(0); 
 	} 
 	else
+	{
+		syslog(LOG_DEBUG,"Socket successfully binded");
 		printf("Socket successfully binded..\n"); 
+	}
 
 	// Now server is ready to listen and verification 
 	if ((listen(sockfd, 5)) != 0) 
 	{ 
+		syslog(LOG_DEBUG,"Listen failed!");
 		printf("Listen failed...\n"); 
 		exit(0); 
 	} 
 	else
+	{
+		syslog(LOG_DEBUG,"Server listening..");
 		printf("Server listening..\n"); 
+	}
 	len = sizeof(cli); 
 
 	// Accept the data packet from client and verification 
 	connfd = accept(sockfd, (SA*)&cli, (socklen_t*)&len); 
 	if (connfd < 0) 
 	{ 
+		syslog(LOG_DEBUG,"Server accept failed!");
 		printf("server acccept failed...\n"); 
 		exit(0); 
 	} 
 	else
+	{
+		syslog(LOG_DEBUG,"Server accept the client...");
 		printf("server acccept the client...\n"); 
+	}
 
 	// Function for chatting between client and server 
 	func(connfd); 
