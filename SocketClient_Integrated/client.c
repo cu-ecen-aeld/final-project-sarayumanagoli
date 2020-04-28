@@ -85,10 +85,8 @@ void read_from_file(int sockfd)
 		}
 		printf("\nFile opened successfully!");
 		read_data = (char *)malloc(100 *sizeof(char));
-		while(signal_flag != true)
+		while((fgets(read_data, 100, data_file)) != NULL && signal_flag != true)
 		{
-			while((fgets(read_data, 100, data_file)) == NULL)
-			;
 			printf("\n To Server: %s",read_data);
 			ret_val = write(sockfd, read_data, (strlen(read_data))); 	// Sending the read packets to the client socket
 			//printf("\nRet_val = %d",ret_val);
@@ -98,7 +96,7 @@ void read_from_file(int sockfd)
 				exit(EXIT_FAILURE);
 			}	
 			//usleep(900000);
-			//sleep(1);
+			sleep(1);
 		}
 		printf("\nNo more data to send!\n");
 		free(read_data);				
